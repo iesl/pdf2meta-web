@@ -1,0 +1,92 @@
+<lift:surround with="default" at="content">
+	<lift:ShowPdf.render>
+		<p>
+			File name:
+			<ul:file_name></ul:file_name>
+		</p>
+
+		<!--MIME Type:
+		   <ul:mime_type></ul:mime_type>
+		   <br/>-->
+		<p> File length:
+			<ul:length></ul:length>
+		</p>
+
+		<!--MD5 Hash:
+		   <ul:md5></ul:md5>
+		   <br/>-->
+		<ul:pdfinfo>
+			<p>
+				<pdfinfo:filename></pdfinfo:filename>
+			</p>
+			<p>
+				<pdfinfo:command></pdfinfo:command>
+			</p>
+			<p>
+				<pdfinfo:output></pdfinfo:output>
+			</p>
+
+
+			<pdfinfo:pages>
+
+				<div class="span-24">
+					<div class="span-3"/>
+					<page:errorbox>
+						<div class="span-18 error">
+							<errorbox:errors>
+								<p>
+									<error:text/>
+								</p>
+							</errorbox:errors>
+						</div>
+					</page:errorbox>
+					<div id="images" class="span-9">
+						<div page:id="main" style="position: relative; top:0; left:0; height:792px; width:612px">
+							<div id="img" style="position: absolute; top:0; left:0">
+								<page:image/>
+							</div>
+							<page:textboxes>
+								<div textbox:class=""
+								     textbox:style="border: green 2px hidden;"
+
+								     onmouseover="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} return true"
+								     onmouseout="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='hidden';} return true">
+									<!--onmouseover="this.style.border='red 2px solid'; return true"
+																		 onmouseout="this.style.border='green 2px
+																		 solid'; return true">-->
+									&nbsp;
+								</div>
+							</page:textboxes>
+							<page:rectboxes>
+								<div rectbox:class="" rectbox:style="border: blue 2px solid;">&nbsp;</div>
+							</page:rectboxes>
+							<page:discardboxes>
+								<div rectbox:class="discard" rectbox:style="background-color: white; opacity: 0.8; visibility: visible;">&nbsp;</div>
+							</page:discardboxes>
+							<page:readingorder/>
+						</div>
+					</div>
+					<div class="span-9 last">
+					<p><form><input type="checkbox" name="discard" checked='true' onclick="discarded=getElementsByClass('discard',document,'div'); for (i = 0; i &lt; discarded.length; i++) {if(checked){discarded[i].style.visibility='visible'}else{discarded[i].style.visibility='hidden'};}; return true"/>Mask discarded</form></p>
+
+					<page:segments>
+						<div segment:class="span-9 last" style="border: green 2px hidden;"
+						     onmouseover="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} return true"
+						     onmouseout="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='hidden';} return true">
+							<div class="span-2 bold loud large top">
+								<segment:classification/>
+							</div>
+							<div class="span-7 last top">
+								<segment:text/>
+							</div>
+						</div>
+					</page:segments>
+					</div>
+				</div>
+			</pdfinfo:pages>
+
+		</ul:pdfinfo>
+		<br/>
+
+	</lift:ShowPdf.render>
+</lift:surround>
