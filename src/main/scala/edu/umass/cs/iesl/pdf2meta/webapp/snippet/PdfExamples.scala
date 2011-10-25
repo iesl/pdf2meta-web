@@ -5,6 +5,7 @@ import net.liftweb.http.S
 import net.liftweb.common.Full
 import net.liftweb.util.BindHelpers._
 import tools.nsc.io.{File, Directory}
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.{filenameBox, filestreamBox}
 
 /*
  * Created by IntelliJ IDEA.

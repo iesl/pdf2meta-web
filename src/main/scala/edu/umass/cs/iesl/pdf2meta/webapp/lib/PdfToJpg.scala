@@ -3,8 +3,8 @@ package edu.umass.cs.iesl.pdf2meta.webapp.lib
 import sys.process.{ProcessIO, Process}
 import com.weiglewilczek.slf4s.Logging
 import scala.None
-import edu.umass.cs.iesl.pdf2meta.webapp.snippet.pageimages
 import edu.umass.cs.iesl.pdf2meta.cli.util.Workspace
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
 
 /*
  * Created by IntelliJ IDEA.

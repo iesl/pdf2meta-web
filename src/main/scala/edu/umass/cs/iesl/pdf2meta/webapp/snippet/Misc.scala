@@ -26,6 +26,7 @@ import util._
 import Helpers._
 
 import xml.{NodeSeq, Group}
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.{filenameBox, filestreamBox}
 
 class Uploader
   {

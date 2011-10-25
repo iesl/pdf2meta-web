@@ -1,5 +1,5 @@
 <lift:surround with="default" at="content">
-	<lift:ShowPdf.render>
+	<lift:showpdf>
 		<p>
 			File name:
 			<ul:file_name></ul:file_name>
@@ -19,27 +19,36 @@
 			<p>
 				<pdfinfo:filename></pdfinfo:filename>
 			</p>
-			<p>
+			<!--<p>
 				<pdfinfo:command></pdfinfo:command>
 			</p>
 			<p>
 				<pdfinfo:output></pdfinfo:output>
-			</p>
+			</p>-->
+			<pdfinfo:successbox>
+				<div class="span-18 success">
+					<successbox:successes>
+						<p>
+							<success:text/>
+						</p>
+					</successbox:successes>
+				</div>
+			</pdfinfo:successbox>
 
+			<pdfinfo:errorbox>
+				<div class="span-18 error">
+					<errorbox:errors>
+						<p>
+							<error:text/>
+						</p>
+					</errorbox:errors>
+				</div>
+			</pdfinfo:errorbox>
 
 			<pdfinfo:pages>
 
 				<div class="span-24">
 					<div class="span-3"/>
-					<page:errorbox>
-						<div class="span-18 error">
-							<errorbox:errors>
-								<p>
-									<error:text/>
-								</p>
-							</errorbox:errors>
-						</div>
-					</page:errorbox>
 					<div id="images" class="span-9">
 						<div page:id="main" style="position: relative; top:0; left:0; height:792px; width:612px">
 							<div id="img" style="position: absolute; top:0; left:0">
@@ -49,8 +58,12 @@
 								<div textbox:class=""
 								     textbox:style="border: green 2px hidden;"
 
-								     onmouseover="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} return true"
-								     onmouseout="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='hidden';} return true">
+								     onmouseover="partners=getElementsByClass(this.classList[0],document,
+								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+								     .border='green 2px solid';} return true"
+								     onmouseout="partners=getElementsByClass(this.classList[0],document,
+								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+								     .border='hidden';} return true">
 									<!--onmouseover="this.style.border='red 2px solid'; return true"
 																		 onmouseout="this.style.border='green 2px
 																		 solid'; return true">-->
@@ -61,26 +74,43 @@
 								<div rectbox:class="" rectbox:style="border: blue 2px solid;">&nbsp;</div>
 							</page:rectboxes>
 							<page:discardboxes>
-								<div rectbox:class="discard" rectbox:style="background-color: white; opacity: 0.8; visibility: visible;">&nbsp;</div>
+								<div rectbox:class="discard"
+								     rectbox:style="background-color: white; opacity: 0.8; visibility: visible;">
+									&nbsp;</div>
 							</page:discardboxes>
 							<page:readingorder/>
 						</div>
 					</div>
 					<div class="span-9 last">
-					<p><form><input type="checkbox" name="discard" checked='true' onclick="discarded=getElementsByClass('discard',document,'div'); for (i = 0; i &lt; discarded.length; i++) {if(checked){discarded[i].style.visibility='visible'}else{discarded[i].style.visibility='hidden'};}; return true"/>Mask discarded</form></p>
+						<p>
 
-					<page:segments>
-						<div segment:class="span-9 last" style="border: green 2px hidden;"
-						     onmouseover="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} return true"
-						     onmouseout="partners=getElementsByClass(this.classList[0],document,'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='hidden';} return true">
-							<div class="span-2 bold loud large top">
-								<segment:classification/>
+						<form><input type="checkbox" name="discard" checked='true'
+						             onclick="discarded=getElementsByClass('discard',document,
+						             'div'); for (i = 0; i &lt; discarded.length; i++) {if(checked){discarded[i]
+						             .style.visibility='visible'}else{discarded[i].style.visibility='hidden'};};
+						             return true"/>Mask
+							discarded
+						</form>
+						</p>
+
+						<page:segments>
+							<div segment:class="span-9 last" style="border: green 2px hidden;"
+							     onmouseover="partners=getElementsByClass(this.classList[0],document,
+							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green
+							     2px solid';} return true"
+							     onmouseout="partners=getElementsByClass(this.classList[0],document,
+							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+							     .border='hidden';} return true">
+								<div class="span-2 bold loud large top"
+								     segment:onmouseover="tooltip.show('aoeu'); return true"
+								     onmouseout="tooltip.hide(); return true">
+									<segment:classification/>
+								</div>
+								<div class="span-7 last top">
+									<segment:text/>
+								</div>
 							</div>
-							<div class="span-7 last top">
-								<segment:text/>
-							</div>
-						</div>
-					</page:segments>
+						</page:segments>
 					</div>
 				</div>
 			</pdfinfo:pages>
@@ -88,5 +118,5 @@
 		</ul:pdfinfo>
 		<br/>
 
-	</lift:ShowPdf.render>
+	</lift:showpdf>
 </lift:surround>

@@ -9,7 +9,7 @@ import http._
 import tools.nsc.io.File
 import scalax.io.Resource
 import xml.NodeSeq
-import edu.umass.cs.iesl.pdf2meta.webapp.snippet.pageimages
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
 
 object ImageLogic
   {

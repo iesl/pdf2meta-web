@@ -2,9 +2,14 @@ package bootstrap.liftweb
 
 import net.liftweb._
 import common._
-import http._
 import edu.umass.cs.iesl.pdf2meta.webapp.lib.ImageLogic
-
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.ShowPdfComponent
+import edu.umass.cs.iesl.pdf2meta.cli.extract.{XmlExtractorComponent, PdfMiner}
+import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
+import http._
+import edu.umass.cs.iesl.pdf2meta.cli.pagetransform._
+import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
+import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{WiredPerceptronComponent, StubCoarseSegmenter, CoarseSegmenterComponent}
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -12,6 +17,7 @@ import edu.umass.cs.iesl.pdf2meta.webapp.lib.ImageLogic
  */
 class Boot
   {
+
   def boot
     {
 
@@ -19,6 +25,9 @@ class Boot
     //   LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))
     // where to search snippet
     LiftRules.addToPackages("edu.umass.cs.iesl.pdf2meta.webapp")
+
+    LiftRules.snippets.append({case List("showpdf") => WiredApp.ShowPdf})
+
 
     // Build SiteMap
     /*   val entries = List(
@@ -47,3 +56,36 @@ class Boot
     LiftRules.dispatch.append(ImageLogic.matcher)
     }
   }
+
+
+object WiredApp extends ShowPdfComponent with WebPipelineComponent with XmlExtractorComponent with
+                        CoarseSegmenterComponent
+  {
+
+  val xmlExtractor = new PdfMiner
+
+  val docTransformer = new DocTransformerComponent
+    {
+    val docTransformer = new DocTransformerPipelineComponent
+      {
+      val transformers = List(new PageStarDocPartitioner
+                              // top-down phase
+                              , new SlicingDocPartitioner
+                              , new DocDeepSorter(RectangularReadingOrder)
+                              //forget all about layout now that the atoms are in order
+                              , new StarDocPartitioner
+                              // bottom-up phase
+                              , new LineMerger
+                              //, new ReferencesMerger
+                              , new ParagraphMerger
+                              // finally ditch any intermediate hierarchy levels
+                              , new AtomStarDocPartitioner)
+      val docTransformer = new DocTransformerPipeline
+      }.docTransformer
+    }.docTransformer
+
+  val coarseSegmenter = new WiredPerceptronComponent  //new StubCoarseSegmenter //
+  val pipeline = new Pipeline;
+  }
+
+
