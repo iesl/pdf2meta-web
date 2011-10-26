@@ -48,7 +48,7 @@
 			<pdfinfo:pages>
 
 				<div class="span-24">
-					<div class="span-3"/>
+					<div class="span-1"/>
 					<div id="images" class="span-9">
 						<div page:id="main" style="position: relative; top:0; left:0; height:792px; width:612px">
 							<div id="img" style="position: absolute; top:0; left:0">
@@ -60,10 +60,10 @@
 
 								     onmouseover="partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-								     .border='green 2px solid';} return true"
+								     .border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; return true"
 								     onmouseout="partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-								     .border='hidden';} return true">
+								     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
 									<!--onmouseover="this.style.border='red 2px solid'; return true"
 																		 onmouseout="this.style.border='green 2px
 																		 solid'; return true">-->
@@ -81,7 +81,7 @@
 							<page:readingorder/>
 						</div>
 					</div>
-					<div class="span-9 last">
+					<div class="span-9">
 						<p>
 
 						<form><input type="checkbox" name="discard" checked='true'
@@ -96,14 +96,12 @@
 						<page:segments>
 							<div segment:class="span-9 last" style="border: green 2px hidden;"
 							     onmouseover="partners=getElementsByClass(this.classList[0],document,
-							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green
-							     2px solid';} return true"
+							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block';
+							      return true"
 							     onmouseout="partners=getElementsByClass(this.classList[0],document,
 							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-							     .border='hidden';} return true">
-								<div class="span-2 bold loud large top"
-								     segment:onmouseover="tooltip.show('aoeu'); return true"
-								     onmouseout="tooltip.hide(); return true">
+							     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
+								<div class="span-2 bold loud large top">
 									<segment:classification/>
 								</div>
 								<div class="span-7 last top">
@@ -111,6 +109,39 @@
 								</div>
 							</div>
 						</page:segments>
+					</div>
+					<div class="span-5 last">
+						<page:features>
+							<div features:id="" class="span-5 last" style="border: green 2px solid; display: none">
+								<span class="bold">Labels</span>
+								<table>
+									<features:scores>
+										<tr>
+											<td>
+												<pair:a/>
+											</td>
+											<td>
+												<pair:b/>
+											</td>
+										</tr>
+									</features:scores>
+								</table>
+								<hr/>
+								<span class="bold">Features</span>
+								<table>
+									<features:features>
+										<tr>
+											<td>
+												<pair:a/>
+											</td>
+											<td>
+												<pair:b/>
+											</td>
+										</tr>
+									</features:features>
+								</table>
+							</div>
+						</page:features>
 					</div>
 				</div>
 			</pdfinfo:pages>
