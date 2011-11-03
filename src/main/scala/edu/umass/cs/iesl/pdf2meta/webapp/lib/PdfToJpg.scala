@@ -15,7 +15,7 @@ import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
 class PdfToJpg(w: Workspace) extends Logging
   {
 
-  val outfilebase = w.file + ".jpg";
+  val outfilebase = w.dir + "/" + w.filename + ".jpg";
   // w.dir + File.separator + w.file.segments.last + ".jpg"
   val command = "/usr/local/bin/convert -verbose " + w.file + " " + outfilebase
 

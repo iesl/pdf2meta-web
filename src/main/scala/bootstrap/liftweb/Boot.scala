@@ -4,12 +4,14 @@ import net.liftweb._
 import common._
 import edu.umass.cs.iesl.pdf2meta.webapp.lib.ImageLogic
 import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.ShowPdfComponent
-import edu.umass.cs.iesl.pdf2meta.cli.extract.{XmlExtractorComponent, PdfMiner}
+import edu.umass.cs.iesl.pdf2meta.cli.extract.PdfMiner
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import http._
 import edu.umass.cs.iesl.pdf2meta.cli.pagetransform._
 import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
-import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{WiredPerceptronComponent, StubCoarseSegmenter, CoarseSegmenterComponent}
+import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenterComponent, AlignedPerceptronCoarseSegmenterComponent}
+import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
+import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, StandardScoringModel}
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -58,33 +60,51 @@ class Boot
   }
 
 
-object WiredApp extends ShowPdfComponent with WebPipelineComponent with XmlExtractorComponent with
-                        CoarseSegmenterComponent
+object WiredApp extends ShowPdfComponent with WebPipelineComponent
+//with XmlExtractorComponent with
+// CoarseSegmenterComponent
   {
 
   val xmlExtractor = new PdfMiner
 
-  val docTransformer = new DocTransformerComponent
+  //val docTransformer = new DocTransformerComponent
+  //  {
+  val docTransformer = new DocTransformerPipelineComponent
     {
-    val docTransformer = new DocTransformerPipelineComponent
+    val transformers = List(new PageStarDocPartitioner
+                            // top-down phase
+                            , new SlicingDocPartitioner, new DocDeepSorter(RectangularReadingOrder)
+                            //forget all about layout now that the atoms are in order
+                            , new StarDocPartitioner
+                            // bottom-up phase
+                            , new LineMerger
+                            //, new ReferencesMerger
+                            , new ParagraphMerger
+                            //, new EmptyEndNodeAdder
+                            // finally ditch any intermediate hierarchy levels
+                            , new AtomStarDocPartitioner)
+    //val docTransformer = new DocTransformerPipeline
+    } //.docTransformer
+  // }.docTransformer
+  val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent
+    {
+    lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent
       {
-      val transformers = List(new PageStarDocPartitioner
-                              // top-down phase
-                              , new SlicingDocPartitioner
-                              , new DocDeepSorter(RectangularReadingOrder)
-                              //forget all about layout now that the atoms are in order
-                              , new StarDocPartitioner
-                              // bottom-up phase
-                              , new LineMerger
-                              //, new ReferencesMerger
-                              , new ParagraphMerger
-                              // finally ditch any intermediate hierarchy levels
-                              , new AtomStarDocPartitioner)
-      val docTransformer = new DocTransformerPipeline
-      }.docTransformer
-    }.docTransformer
+      lazy val scoringModel = StandardScoringModel
+      }
+    lazy val segmentSmoother = new BestCoarseLabelModelAligner
+      {
+      val coarseLabelModels = List(new StandardCoarseLabelModel) //, new LetterCoarseLabelModel)
+      }
+    }
 
-  val coarseSegmenter = new WiredPerceptronComponent  //new StubCoarseSegmenter //
+  /*  val coarseSegmenter = new CoarseSegmenterPipelineComponent
+    {
+  val segmenters = List(
+  new WiredPerceptronComponent  //new StubCoarseSegmenter //
+  new GlobalRulesSegmenterComponent
+    )
+*/
   val pipeline = new Pipeline;
   }
 

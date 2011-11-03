@@ -2,7 +2,6 @@ package edu.umass.cs.iesl.pdf2meta.webapp.lib
 
 import net.liftweb._
 import common._
-import util._
 import net.liftweb.util.Helpers._
 
 import http._
@@ -38,16 +37,19 @@ object ImageLogic
     }
   def serveImage(img: PageImage, req: Req): Box[LiftResponse] =
     {
-    Full(InMemoryResponse(Resource.fromInputStream(img.file.inputStream()).byteArray,
-                          List("Last-Modified" -> toInternetDate(img.file.lastModified), "Content-Type" -> "image/jpg",
-                               "Content-Length" -> img.file.length.toString), Nil /*cookies*/ , 200))
+    Full(InMemoryResponse(img.bytes, List("Last-Modified" -> img.date, "Content-Type" -> "image/jpg", "Content-Length" -> img.length), Nil /*cookies*/ , 200))
     }
   }
 
-case class PageImage(pageid:Int, file: File, mimeType: String)
+case class PageImage(pageid: Int, file: File, mimeType: String)
   {
-  def imageUrl : NodeSeq = {
-     <img src={"/image/"+pageid} />
-   }
+  val bytes: Array[Byte] = Resource.fromInputStream(file.inputStream()).byteArray
+  val date = toInternetDate(file.lastModified)
+  val length = file.length.toString
 
+  def imageUrl: NodeSeq =
+    {
+      <img src={"/image/" + pageid}/>
+    }
   }
+
