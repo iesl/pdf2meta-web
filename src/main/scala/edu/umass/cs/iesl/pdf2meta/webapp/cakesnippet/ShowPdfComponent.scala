@@ -12,15 +12,15 @@ import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel._
 import collection.Seq
 import java.util.Date
-import edu.umass.cs.iesl.pdf2meta.cli.util.{StreamWorkspace, Workspace}
+import edu.umass.cs.iesl.pdf2meta.cli.util.StreamWorkspace
 
 
 trait ShowPdfComponent
   {
   this: WebPipelineComponent =>
-         // with XmlExtractorComponent with
-         // CoarseSegmenterComponent =>
 
+  // with XmlExtractorComponent with
+  // CoarseSegmenterComponent =>
   object ShowPdf extends Function1[NodeSeq, NodeSeq]
     {
     def apply(in: NodeSeq): NodeSeq =
@@ -53,7 +53,6 @@ trait ShowPdfComponent
         val allDelimitingBoxes: Seq[DelimitingBox] = doc.delimitingBoxes
 
         val allTextBoxes: Seq[DocNode] = doc.children //textBoxChildren
-
         def bindPage(pageTemplate: NodeSeq): NodeSeq =
           {
 
@@ -65,10 +64,10 @@ trait ShowPdfComponent
                           {page =>
                             {
                             val rectangles: ClassifiedRectangles = classifiedRectangles.onPage(page)
-                           // val legitNonRedundant: Seq[ClassifiedRectangle] = rectangles.legitNonRedundant
-
-                            val all: Seq[ClassifiedRectangle] = rectangles.legit
-                          //  val legit: Seq[ClassifiedRectangle] = rectangles.legit
+                            // val legitNonRedundant: Seq[ClassifiedRectangle] = rectangles.legitNonRedundant
+                            val all: Seq[ClassifiedRectangle] = rectangles.raw
+                            //val legit: Seq[ClassifiedRectangle] = rectangles.legit
+                            val legit: Seq[ClassifiedRectangle] = rectangles.legit
                             val discarded: Seq[ClassifiedRectangle] = rectangles.discarded
 
                             val image = pageimages.get(page.pagenum).imageUrl
@@ -84,10 +83,10 @@ trait ShowPdfComponent
                                                                   case None => false;
                                                                 })
 
-                            bind("page", pageTemplate, AttrBindParam("id", page.pagenum.toString, "id"), "image" -> image, "segments" -> bindSegment(all) _,
-                                 "features" -> bindFeatures(all) _, "textboxes" -> bindTextBoxes(textBoxes) _, "rectboxes" -> bindDelimitingBoxes(delimitingBoxes) _,
-                                 "discardboxes" -> bindDiscards(discarded.map(_.node)) _, "readingorder" ->
-                                                                                        bindReadingOrder(page, ReadingOrderPair.joinPairs(rectangles.raw.map(_.node).toList)) _)
+                            bind("page", pageTemplate, AttrBindParam("id", page.pagenum.toString, "id"), "image" -> image, "segments" -> bindSegment(all) _, "features" -> bindFeatures(all) _,
+                                 "textboxes" -> bindTextBoxes(textBoxes) _, "rectboxes" -> bindDelimitingBoxes(delimitingBoxes) _, "discardboxes" -> bindDiscards(discarded.map(_.node)) _,
+                                 "readingorder" ->
+                                 bindReadingOrder(page, ReadingOrderPair.joinPairs(legit.map(_.node).toList)) _)
                             };
                           }
           boundPage
@@ -117,7 +116,7 @@ trait ShowPdfComponent
       {
       segments.flatMap
       {
-      case x:ClassifiedRectangle =>
+      case x: ClassifiedRectangle =>
         {
         //val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
         //val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
@@ -134,7 +133,7 @@ trait ShowPdfComponent
           }
 
         bind("segment", segmentTemplate, "classification" -> x.label.getOrElse("[none]"), "text" ->
-                                                                             truncatedText,
+                                                                                          truncatedText,
 
              /*FuncAttrBindParam("onmouseover", (ns: NodeSeq) =>
           {
@@ -144,7 +143,7 @@ trait ShowPdfComponent
           }, "onmouseover"),
              //AttrBindParam("style", "border: green 2px solid; visibility: invisible; ", "style"),
              */
-             FuncAttrBindParam("class", (ns: NodeSeq) => addId(x.node, ns), "class"))
+             FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))), "class"))
         }
       case _ => NodeSeq.Empty
       }
@@ -155,7 +154,7 @@ trait ShowPdfComponent
       {
       segments.flatMap
       {
-      case  ClassifiedRectangle(textbox: DocNode, features, scores, Some(x)) =>
+      case ClassifiedRectangle(textbox: DocNode, features, scores, Some(x)) =>
         {
         //val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
         // val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
@@ -168,7 +167,7 @@ trait ShowPdfComponent
         bind("features", segmentTemplate, "features" -> bindPair(x.featureWeights.asSeq.map(f => (f._1.toString, f._2)).iterator) _, "scores" -> bindPair(x.labelWeights.asSeq.iterator) _,
              FuncAttrBindParam("id", (ns: NodeSeq) => Text(textbox.id), "id"))
         }
-      case ClassifiedRectangle(textbox: DocNode,features, scores, None) =>
+      case ClassifiedRectangle(textbox: DocNode, features, scores, None) =>
         {
         //val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
         // val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")

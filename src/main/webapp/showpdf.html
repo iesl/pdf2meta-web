@@ -44,7 +44,19 @@
 					</errorbox:errors>
 				</div>
 			</pdfinfo:errorbox>
+<p>
 
+						<form><input type="checkbox" name="discard" checked='false'
+						             onclick="discardrev=getElementsByClass('discardrev',document,
+						             'div'); for (i = 0; i &lt; discardrev.length; i++) {if(!checked){discardrev[i]
+						             .style.display = 'block'}else{discardrev[i].style.display = 'none'};};
+						             discarded=getElementsByClass('discard',document,
+						             'div'); for (i = 0; i &lt; discarded.length; i++) {if(checked){discarded[i]
+						             .style.display = 'block'}else{discarded[i].style.display = 'none'};};
+						             return true"/>Show
+							discarded
+						</form>
+						</p>
 			<pdfinfo:pages>
 
 				<div class="span-24">
@@ -74,7 +86,7 @@
 								<div rectbox:class="" rectbox:style="border: blue 2px solid;">&nbsp;</div>
 							</page:rectboxes>
 							<page:discardboxes>
-								<div rectbox:class="discard"
+								<div rectbox:class="discardrev"
 								     rectbox:style="background-color: white; opacity: 0.8; visibility: visible;">
 									&nbsp;</div>
 							</page:discardboxes>
@@ -82,16 +94,7 @@
 						</div>
 					</div>
 					<div class="span-9">
-						<p>
 
-						<form><input type="checkbox" name="discard" checked='true'
-						             onclick="discarded=getElementsByClass('discard',document,
-						             'div'); for (i = 0; i &lt; discarded.length; i++) {if(checked){discarded[i]
-						             .style.visibility='visible'}else{discarded[i].style.visibility='hidden'};};
-						             return true"/>Mask
-							discarded
-						</form>
-						</p>
 
 						<page:segments>
 							<div segment:class="span-9 last" style="border: green 2px hidden;"

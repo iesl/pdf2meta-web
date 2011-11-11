@@ -71,18 +71,25 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent
   //  {
   val docTransformer = new DocTransformerPipelineComponent
     {
-    val transformers = List(new PageStarDocPartitioner
+    val transformers = List(new PageHonoringDocFlattener
                             // top-down phase
-                            , new SlicingDocPartitioner, new DocDeepSorter(RectangularReadingOrder)
-                            //forget all about layout now that the atoms are in order
-                            , new StarDocPartitioner
+                            , new SlicingDocPartitioner
+                            , new DoubleSpaceSlicingCorrection
+                            , new DocDeepSorter(RectangularReadingOrder)
+                            //forget about layout now that the atoms are in order, except for partitioning
+  //  ,new PartitionsOrAtomsDocValidator
+  //                          , new PartitionHonoringDocFlattener  // probably a no-op
+  //  ,new PartitionsOrAtomsDocValidator
                             // bottom-up phase
                             , new LineMerger
-                            //, new ReferencesMerger
-                            , new ParagraphMerger
-                            //, new EmptyEndNodeAdder
+                            , new SidewaysLineMerger
+                            , new IndentedParagraphsMerger
+                            //, new ParagraphMerger
+                            , new EmptyEndNodeAdder
                             // finally ditch any intermediate hierarchy levels
-                            , new AtomStarDocPartitioner)
+                            , new AtomDocFlattener
+  //  ,new PartitionsOrAtomsDocValidator
+                           )
     //val docTransformer = new DocTransformerPipeline
     } //.docTransformer
   // }.docTransformer
