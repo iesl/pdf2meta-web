@@ -59,16 +59,11 @@ class Boot
     }
   }
 
-
 object WiredApp extends ShowPdfComponent with WebPipelineComponent
-//with XmlExtractorComponent with
-// CoarseSegmenterComponent
   {
 
   val xmlExtractor = new PdfMiner
 
-  //val docTransformer = new DocTransformerComponent
-  //  {
   val docTransformer = new DocTransformerPipelineComponent
     {
     val transformers = List(new PageHonoringDocFlattener
@@ -76,23 +71,19 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent
                             , new SlicingDocPartitioner
                             , new WeakPartitionRemover
                             , new DocDeepSorter(RectangularReadingOrder)
-                            //forget about layout now that the atoms are in order, except for partitioning
-  //  ,new PartitionsOrAtomsDocValidator
-  //                          , new PartitionHonoringDocFlattener  // probably a no-op
-  //  ,new PartitionsOrAtomsDocValidator
+
                             // bottom-up phase
                             , new LineMerger
                             , new SidewaysLineMerger
                             , new IndentedParagraphsMerger
-                            //, new ParagraphMerger
                             , new EmptyEndNodeAdder
+
                             // finally ditch any intermediate hierarchy levels
-                            , new AtomDocFlattener
-  //  ,new PartitionsOrAtomsDocValidator
+                            , new DocFlattener
                            )
-    //val docTransformer = new DocTransformerPipeline
-    } //.docTransformer
-  // }.docTransformer
+
+    }
+
   val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent
     {
     lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent
@@ -105,13 +96,6 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent
       }
     }
 
-  /*  val coarseSegmenter = new CoarseSegmenterPipelineComponent
-    {
-  val segmenters = List(
-  new WiredPerceptronComponent  //new StubCoarseSegmenter //
-  new GlobalRulesSegmenterComponent
-    )
-*/
   val pipeline = new Pipeline;
   }
 
