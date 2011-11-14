@@ -74,7 +74,7 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent
     val transformers = List(new PageHonoringDocFlattener
                             // top-down phase
                             , new SlicingDocPartitioner
-                            , new DoubleSpaceSlicingCorrection
+                            , new WeakPartitionRemover
                             , new DocDeepSorter(RectangularReadingOrder)
                             //forget about layout now that the atoms are in order, except for partitioning
   //  ,new PartitionsOrAtomsDocValidator
