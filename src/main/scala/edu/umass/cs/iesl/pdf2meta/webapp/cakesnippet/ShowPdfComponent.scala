@@ -12,11 +12,7 @@ import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel._
 import collection.Seq
 import java.util.Date
-import edu.umass.cs.iesl.pdf2meta.cli.util.StreamWorkspace
-import xml.NodeSeq
-import xml.NodeSeq
-import xml.NodeSeq
-import xml.NodeSeq
+import edu.umass.cs.iesl.scalacommons.StreamWorkspace
 
 trait ShowPdfComponent
   {
