@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="nu.validator.htmlparser_htmlparser_1.2.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib_managed/jars/nu.validator.htmlparser/htmlparser/htmlparser-1.2.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/nu.validator.htmlparser/htmlparser/jars/htmlparser-1.2.1.jar!/"></root>
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$PROJECT_DIR$/lib_managed/docs/nu.validator.htmlparser/htmlparser/htmlparser-1.2.1-javadoc.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/nu.validator.htmlparser/htmlparser/docs/htmlparser-1.2.1-javadoc.jar!/"></root>
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/lib_managed/srcs/nu.validator.htmlparser/htmlparser/htmlparser-1.2.1-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/nu.validator.htmlparser/htmlparser/srcs/htmlparser-1.2.1-sources.jar!/"></root>
     </SOURCES>
   </library>
 </component>

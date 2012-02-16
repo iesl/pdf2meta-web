@@ -17,7 +17,7 @@ class PdfExamples
   {
   def render(in: NodeSeq): NodeSeq =
     {
-    val exampleDir = Directory("/Users/lorax/iesl/pdf2meta/ReadingOrderCases")
+    val exampleDir = Directory(System.getProperty("pdf2metaExamples")) //"/Users/lorax/iesl/pdf2meta/ReadingOrderCases")
     val examples = exampleDir.files.toSeq.filter(x => !x.name.startsWith("."))
 
 

@@ -16,7 +16,9 @@ class PdfToJpg(w: Workspace) extends Logging {
 
   val outfilebase = w.dir + "/" + w.filename + ".jpg";
   // w.dir + File.separator + w.file.segments.last + ".jpg"
-  val command = "/usr/local/bin/convert -verbose " + w.file + " " + outfilebase
+  // ** make sure ImageMagick stuff is in the path
+  // /usr/local/bin/convert
+  val command = "convert -verbose " + w.file + " " + outfilebase
 
   val output = {
     logger.info("Running " + command)
