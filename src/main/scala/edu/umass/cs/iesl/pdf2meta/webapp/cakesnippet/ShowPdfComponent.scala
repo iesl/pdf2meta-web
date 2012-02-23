@@ -13,6 +13,7 @@ import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel._
 import collection.Seq
 import java.util.Date
 import edu.umass.cs.iesl.scalacommons.StreamWorkspace
+import org.scala_tools.subcut.inject.{BindingModule, AutoInjectable}
 
 trait ShowPdfComponent
   {
@@ -20,7 +21,7 @@ trait ShowPdfComponent
 
   // with XmlExtractorComponent with
   // CoarseSegmenterComponent =>
-  object ShowPdf extends Function1[NodeSeq, NodeSeq]
+  class ShowPdf extends Function1[NodeSeq, NodeSeq] with AutoInjectable
     {
     def apply(in: NodeSeq): NodeSeq =
       {

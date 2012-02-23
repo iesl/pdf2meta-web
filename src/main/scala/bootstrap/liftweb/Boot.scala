@@ -12,23 +12,31 @@ import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenterComponent, AlignedPerceptronCoarseSegmenterComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
 import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, StandardScoringModel}
+import org.scala_tools.subcut.inject.NewBindingModule
+import com.davidsoergel.dsutils.PropertiesUtils
+import edu.umass.cs.iesl.pdf2meta.webapp.snippet.PdfExamples
 
 /**
  * A class that's instantiated early and run.  It allows the application
  * to modify lift's environment
  */
-class Boot
-  {
+class Boot {
 
-  def boot
-    {
+  def boot {
+    implicit val bindingModule = ProjectConfiguration
 
     // Use HTML5 for rendering
     //   LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))
     // where to search snippet
     LiftRules.addToPackages("edu.umass.cs.iesl.pdf2meta.webapp")
 
-    LiftRules.snippets.append({case List("showpdf") => WiredApp.ShowPdf})
+    LiftRules.snippets.append({
+      case List("showpdf") => new WiredApp.ShowPdf()
+    })
+
+    LiftRules.snippets.append({
+      case List("pdfexamples") => new PdfExamples().render
+    }) // ensure that the subcut config is passed
 
 
     // Build SiteMap
@@ -46,57 +54,60 @@ class Boot
 */
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
-            Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
+      Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
 
     // Make the spinny image go away when it ends
     LiftRules.ajaxEnd =
-            Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
+      Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
 
     // Force the request to be UTF-8
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
     LiftRules.dispatch.append(ImageLogic.matcher)
-    }
   }
+}
 
-object WiredApp extends ShowPdfComponent with WebPipelineComponent
-  {
+object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 
   val xmlExtractor = new PdfMiner
 
-  val docTransformer = new DocTransformerPipelineComponent
-    {
+  val docTransformer = new DocTransformerPipelineComponent {
     val transformers = List(new PageHonoringDocFlattener
-                            // top-down phase
-                            , new SlicingDocPartitioner
-                            , new WeakPartitionRemover
-                            , new DocDeepSorter(RectangularReadingOrder)
+      // top-down phase
+      , new SlicingDocPartitioner
+      , new WeakPartitionRemover
+      , new DocDeepSorter(RectangularReadingOrder)
 
-                            // bottom-up phase
-                            , new LineMerger
-                            , new SidewaysLineMerger
-                            , new IndentedParagraphsMerger
-                            , new EmptyEndNodeAdder
+      // bottom-up phase
+      , new LineMerger
+      , new SidewaysLineMerger
+      , new IndentedParagraphsMerger
+      , new EmptyEndNodeAdder
 
-                            // finally ditch any intermediate hierarchy levels
-                            , new DocFlattener
-                           )
+      // finally ditch any intermediate hierarchy levels
+      , new DocFlattener
+    )
 
-    }
-
-  val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent
-    {
-    lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent
-      {
-      lazy val scoringModel = StandardScoringModel
-      }
-    lazy val segmentSmoother = new BestCoarseLabelModelAligner
-      {
-      val coarseLabelModels = List(new StandardCoarseLabelModel) //, new LetterCoarseLabelModel)
-      }
-    }
-
-  val pipeline = new Pipeline;
   }
 
+  val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent {
+    lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent {
+      lazy val scoringModel = StandardScoringModel
+    }
+    lazy val segmentSmoother = new BestCoarseLabelModelAligner {
+      val coarseLabelModels = List(new StandardCoarseLabelModel) //, new LetterCoarseLabelModel)
+    }
+  }
 
+  val pipeline = new Pipeline;
+}
+
+object ProjectConfiguration extends NewBindingModule({
+  module =>
+    import module._
+    // can now use bind directly
+
+    val props = PropertiesUtils.loadPropsFromFile(PropertiesUtils.findPropertiesFile("pdf2meta.properties", ".pdf2meta", "pdf2meta.properties"))
+    bind[String] idBy 'convert toSingle props.getProperty("convert")
+    bind[String] idBy 'examples toSingle props.getProperty("examples")
+})

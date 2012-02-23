@@ -5,6 +5,8 @@ import com.weiglewilczek.slf4s.Logging
 import scala.None
 import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
 import edu.umass.cs.iesl.scalacommons.Workspace
+import com.davidsoergel.dsutils.PropertiesUtils
+import org.scala_tools.subcut.inject.AutoInjectable
 
 /*
  * Created by IntelliJ IDEA.
@@ -12,13 +14,14 @@ import edu.umass.cs.iesl.scalacommons.Workspace
  * Date: 9/2/11
  * Time: 11:50 AM
  */
-class PdfToJpg(w: Workspace) extends Logging {
+class PdfToJpg(w: Workspace) extends Logging with AutoInjectable  {
 
   val outfilebase = w.dir + "/" + w.filename + ".jpg";
   // w.dir + File.separator + w.file.segments.last + ".jpg"
   // ** make sure ImageMagick stuff is in the path
   // /usr/local/bin/convert
-  val command = "convert -verbose " + w.file + " " + outfilebase
+  val convertPath = inject[String]('convert)
+  val command = convertPath + " -verbose " + w.file + " " + outfilebase
 
   val output = {
     logger.info("Running " + command)
