@@ -1,156 +1,169 @@
 <lift:surround with="default" at="content">
-	<lift:showpdf>
-		<p>
-			File name:
-			<ul:file_name></ul:file_name>
-		</p>
+    <lift:showpdf>
+        <p>
+            File name:
+            <ul:file_name></ul:file_name>
+        </p>
 
-		<!--MIME Type:
-		   <ul:mime_type></ul:mime_type>
-		   <br/>-->
-		<p> File length:
-			<ul:length></ul:length>
-		</p>
+        <!--MIME Type:
+             <ul:mime_type></ul:mime_type>
+             <br/>-->
+        <p> File length:
+            <ul:length></ul:length>
+        </p>
 
-		<!--MD5 Hash:
-		   <ul:md5></ul:md5>
-		   <br/>-->
-		<ul:pdfinfo>
-			<p>
-				<pdfinfo:filename></pdfinfo:filename>
-			</p>
-			<!--<p>
-				<pdfinfo:command></pdfinfo:command>
-			</p>
-			<p>
-				<pdfinfo:output></pdfinfo:output>
-			</p>-->
-			<pdfinfo:successbox>
-				<div class="span-18 success">
-					<successbox:successes>
-						<p>
-							<success:text/>
-						</p>
-					</successbox:successes>
-				</div>
-			</pdfinfo:successbox>
+        <!--MD5 Hash:
+             <ul:md5></ul:md5>
+             <br/>-->
+        <ul:pdfinfo>
+            <p>
+                <pdfinfo:filename></pdfinfo:filename>
+            </p>
+            <!--<p>
+                   <pdfinfo:command></pdfinfo:command>
+               </p>
+               <p>
+                   <pdfinfo:output></pdfinfo:output>
+               </p>-->
+            <pdfinfo:successbox>
+                <div class="span-18 success">
+                    <successbox:successes>
+                        <p>
+                            <success:text/>
+                        </p>
+                    </successbox:successes>
+                </div>
+            </pdfinfo:successbox>
 
-			<pdfinfo:errorbox>
-				<div class="span-18 error">
-					<errorbox:errors>
-						<p>
-							<error:text/>
-						</p>
-					</errorbox:errors>
-				</div>
-			</pdfinfo:errorbox>
-<p>
+            <pdfinfo:errorbox>
+                <div class="span-18 error">
+                    <errorbox:errors>
+                        <p>
+                            <error:text/>
+                        </p>
+                    </errorbox:errors>
+                </div>
+            </pdfinfo:errorbox>
+            <p>
 
-						<form><input type="checkbox" name="discard" checked='false'
-						             onclick="discardrev=getElementsByClass('discardrev',document,
+            <form><input type="checkbox" name="discard" checked='false'
+                         onclick="discardrev=getElementsByClass('discardrev',document,
 						             'div'); for (i = 0; i &lt; discardrev.length; i++) {if(!checked){discardrev[i]
 						             .style.display = 'block'}else{discardrev[i].style.display = 'none'};};
 						             discarded=getElementsByClass('discard',document,
 						             'div'); for (i = 0; i &lt; discarded.length; i++) {if(checked){discarded[i]
 						             .style.display = 'block'}else{discarded[i].style.display = 'none'};};
-						             return true"/>Show
-							discarded
-						</form>
-						</p>
-			<pdfinfo:pages>
+						             return true"/>Show discarded
+                <BR/>
+                <input type="checkbox" name="whitespace" checked='false'
+                       onclick="whitespacerev=getElementsByClass('whitespacerev',document,
+						             'div'); for (i = 0; i &lt; whitespacerev.length; i++) {if(!checked){whitespacerev[i]
+						             .style.display = 'block'}else{whitespacerev[i].style.display = 'none'};};
+						             whitespace=getElementsByClass('whitespace',document,
+						             'div'); for (i = 0; i &lt; whitespace.length; i++) {if(checked){whitespace[i]
+						             .style.display = 'block'}else{whitespace[i].style.display = 'none'};};
+						             return true"/>Show whitespace
+            </form>
+            </p>
+            <pdfinfo:pages>
 
-				<div class="span-24">
-					<div class="span-1"/>
-					<div id="images" class="span-9">
-						<div page:id="main" style="position: relative; top:0; left:0; height:792px; width:612px">
-							<div id="img" style="position: absolute; top:0; left:0">
-								<page:image/>
-							</div>
-							<page:textboxes>
-								<div textbox:class=""
-								     textbox:style="border: green 2px hidden;"
+                <div class="span-24">
+                    <div class="span-1"/>
+                    <div id="images" class="span-9">
+                        <div page:id="main" style="position: relative; top:0; left:0; height:792px; width:612px">
+                            <div id="img" style="position: absolute; top:0; left:0">
+                                <page:image/>
+                            </div>
+                            <page:textboxes>
+                                <div textbox:class=""
+                                     textbox:style="border: green 2px hidden;"
 
-								     onmouseover="partners=getElementsByClass(this.classList[0],document,
+                                     onmouseover="partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
 								     .border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; return true"
-								     onmouseout="partners=getElementsByClass(this.classList[0],document,
+                                     onmouseout="partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
 								     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
-									<!--onmouseover="this.style.border='red 2px solid'; return true"
-																		 onmouseout="this.style.border='green 2px
-																		 solid'; return true">-->
-									&nbsp;
-								</div>
-							</page:textboxes>
-							<page:rectboxes>
-								<div rectbox:class="" rectbox:style="border: blue 2px solid;">&nbsp;</div>
-							</page:rectboxes>
-							<page:discardboxes>
-								<div rectbox:class="discardrev"
-								     rectbox:style="background-color: white; opacity: 0.8; visibility: visible;">
-									&nbsp;</div>
-							</page:discardboxes>
-							<page:readingorder/>
-						</div>
-					</div>
-					<div class="span-9">
+                                    <!--onmouseover="this.style.border='red 2px solid'; return true"
+                                                                                  onmouseout="this.style.border='green 2px
+                                                                                  solid'; return true">-->
+                                    &nbsp;
+                                </div>
+                            </page:textboxes>
+                            <page:rectboxes>
+                                <div rectbox:class="" rectbox:style="border: blue 2px solid;">&nbsp;</div>
+                            </page:rectboxes>
+                            <page:discardboxes>
+                                <div rectbox:class="discardrev"
+                                     rectbox:style="background-color: white; opacity: 0.8; visibility: visible;">
+                                    &nbsp;</div>
+                            </page:discardboxes>
+                            <page:whitespaceboxes>
+                                <div rectbox:class="whitespacerev"
+                                     rectbox:style="border: orange 2px solid; display: none; visibility: visible;">
+                                    &nbsp;</div>
+                            </page:whitespaceboxes>
+                            <page:readingorder/>
+                        </div>
+                    </div>
+                    <div class="span-9">
 
 
-						<page:segments>
-							<div segment:class="span-9 last" style="border: green 2px hidden;"
-							     onmouseover="partners=getElementsByClass(this.classList[0],document,
+                        <page:segments>
+                            <div segment:class="span-9 last" style="border: green 2px hidden;"
+                                 onmouseover="partners=getElementsByClass(this.classList[0],document,
 							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block';
 							      return true"
-							     onmouseout="partners=getElementsByClass(this.classList[0],document,
+                                 onmouseout="partners=getElementsByClass(this.classList[0],document,
 							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
 							     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
-								<div class="span-2 bold loud large top">
-									<segment:classification/>
-								</div>
-								<div class="span-7 last top">
-									<segment:text/>
-								</div>
-							</div>
-						</page:segments>
-					</div>
-					<div class="span-5 last">
-						<page:features>
-							<div features:id="" class="span-5 last" style="border: green 2px solid; display: none">
-								<span class="bold">Labels</span>
-								<table>
-									<features:scores>
-										<tr>
-											<td>
-												<pair:a/>
-											</td>
-											<td>
-												<pair:b/>
-											</td>
-										</tr>
-									</features:scores>
-								</table>
-								<hr/>
-								<span class="bold">Features</span>
-								<table>
-									<features:features>
-										<tr>
-											<td>
-												<pair:a/>
-											</td>
-											<td>
-												<pair:b/>
-											</td>
-										</tr>
-									</features:features>
-								</table>
-							</div>
-						</page:features>
-					</div>
-				</div>
-			</pdfinfo:pages>
+                                <div class="span-2 bold loud large top">
+                                    <segment:classification/>
+                                </div>
+                                <div class="span-7 last top">
+                                    <segment:text/>
+                                </div>
+                            </div>
+                        </page:segments>
+                    </div>
+                    <div class="span-5 last">
+                        <page:features>
+                            <div features:id="" class="span-5 last" style="border: green 2px solid; display: none">
+                                <span class="bold">Labels</span>
+                                <table>
+                                    <features:scores>
+                                        <tr>
+                                            <td>
+                                                <pair:a/>
+                                            </td>
+                                            <td>
+                                                <pair:b/>
+                                            </td>
+                                        </tr>
+                                    </features:scores>
+                                </table>
+                                <hr/>
+                                <span class="bold">Features</span>
+                                <table>
+                                    <features:features>
+                                        <tr>
+                                            <td>
+                                                <pair:a/>
+                                            </td>
+                                            <td>
+                                                <pair:b/>
+                                            </td>
+                                        </tr>
+                                    </features:features>
+                                </table>
+                            </div>
+                        </page:features>
+                    </div>
+                </div>
+            </pdfinfo:pages>
 
-		</ul:pdfinfo>
-		<br/>
+        </ul:pdfinfo>
+        <br/>
 
-	</lift:showpdf>
+    </lift:showpdf>
 </lift:surround>

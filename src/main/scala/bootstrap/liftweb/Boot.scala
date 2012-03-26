@@ -105,7 +105,7 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 object ProjectConfiguration extends NewBindingModule({
   module =>
     import module._
-    // can now use bind directly
+    // can now use bind directlyg
 
     val props = PropertiesUtils.loadPropsFromFile(PropertiesUtils.findPropertiesFile("pdf2meta.properties", ".pdf2meta", "pdf2meta.properties"))
     bind[String] idBy 'convert toSingle props.getProperty("convert")
