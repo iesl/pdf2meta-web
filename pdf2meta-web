@@ -1,0 +1,17 @@
+#!/bin/sh
+
+
+oldpwd=`pwd`
+
+# we want to reference logback.xml in the installation directory, but we don't know where that is.
+# solution from http://hintsforums.macworld.com/archive/index.php/t-73839.html
+
+IFS=$' \t\n'
+arg=$0; [[ -L $0 ]] && arg=$(stat -f '%Y' "$0")
+pth=$(2>/dev/null cd "${arg%/*}" >&2; echo "`pwd -P`/${arg##*/}")
+par=$(dirname "$pth")
+
+cd $par
+java -cp $par/target/pdf2meta-web-assembly-0.1-SNAPSHOT.jar -Dlogback.configurationFile=$par/logback.xml -Dpdf2metaExamples=$par/examplePDFs edu.umass.cs.iesl.pdf2meta.webapp.Main $*
+
+cd $oldpwd
