@@ -35,7 +35,7 @@ object ReadingOrderPair
     }
   }
 
-case class ReadingOrderPair(x1: Double, y1r: Double, x2: Double, y2r: Double)
+case class ReadingOrderPair(x1: Float, y1r: Float, x2: Float, y2r: Float)
   {
   val y1 = if (y2r - y1r > 10)
              {y1r - 3}

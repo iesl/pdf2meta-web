@@ -4,10 +4,8 @@ import net.liftweb._
 import common._
 import edu.umass.cs.iesl.pdf2meta.webapp.lib.ImageLogic
 import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.ShowPdfComponent
-import edu.umass.cs.iesl.pdf2meta.cli.extract.PdfMiner
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import http._
-import edu.umass.cs.iesl.pdf2meta.cli.pagetransform._
 import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenterComponent, AlignedPerceptronCoarseSegmenterComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
@@ -15,6 +13,9 @@ import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, Standard
 import org.scala_tools.subcut.inject.NewBindingModule
 import com.davidsoergel.dsutils.PropertiesUtils
 import edu.umass.cs.iesl.pdf2meta.webapp.snippet.PdfExamples
+import edu.umass.cs.iesl.pdf2meta.cli.extract.pdfbox.{SpaceEstimator, PdfBoxExtractor}
+import edu.umass.cs.iesl.pdf2meta.cli.pagetransform._
+import edu.umass.cs.iesl.pdf2meta.cli.extract.PdfMinerExtractor
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -69,19 +70,31 @@ class Boot {
 
 object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 
-  val xmlExtractor = new PdfMiner
+  val pdfExtractor = new PdfBoxExtractor
+  //val pdfExtractor = new PdfMinerExtractor
 
   val docTransformer = new DocTransformerPipelineComponent {
-    val transformers = List(new PageHonoringDocFlattener
+    val transformers = List(
+
+	    new PageHonoringDocFlattener
+    // don't try to merge lines or paras before sorting, because they may not be in order
+      //, new ContinuousLineMerger
+	 // , new SpaceEstimator
+
+    // try merging paragraphs before slicing, to avoid slicing a para in half
+	//  , new IndentedParagraphsMerger
+
       // top-down phase
-      , new SlicingDocPartitioner
+      , new WhitespaceDocPartitioner //Slicing
       , new WeakPartitionRemover
+      , new ContinuousLineMerger
+      , new SpaceEstimator
       , new DocDeepSorter(RectangularReadingOrder)
 
       // bottom-up phase
       , new LineMerger
       , new SidewaysLineMerger
-      , new IndentedParagraphsMerger
+      //, new IndentedParagraphsMerger
       , new EmptyEndNodeAdder
 
       // finally ditch any intermediate hierarchy levels
@@ -105,7 +118,7 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 object ProjectConfiguration extends NewBindingModule({
   module =>
     import module._
-    // can now use bind directlyg
+    // can now use bind directly
 
     val props = PropertiesUtils.loadPropsFromFile(PropertiesUtils.findPropertiesFile("pdf2meta.properties", ".pdf2meta", "pdf2meta.properties"))
     bind[String] idBy 'convert toSingle props.getProperty("convert")
