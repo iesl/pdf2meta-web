@@ -28,7 +28,9 @@ resolvers += "IESL Repo" at "https://dev-iesl.cs.umass.edu/nexus/content/reposit
 
 resolvers += "IESL Snapshot Repo" at "https://dev-iesl.cs.umass.edu/nexus/content/repositories/snapshots"
 
-resolvers += "David Soergel Repo" at "http://dev.davidsoergel.com/artifactory/repo"
+resolvers += "David Soergel Repo" at "http://dev.davidsoergel.com/nexus/content/groups/public"
+
+resolvers += "David Soergel Snapshots" at "http://dev.davidsoergel.com/nexus/content/groups/snapshots"
 
 seq(assemblySettings: _*)
 
