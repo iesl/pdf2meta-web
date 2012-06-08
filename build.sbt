@@ -30,7 +30,7 @@ resolvers += "IESL Snapshot Repo" at "https://dev-iesl.cs.umass.edu/nexus/conten
 
 resolvers += "David Soergel Repo" at "http://dev.davidsoergel.com/nexus/content/groups/public"
 
-resolvers += "David Soergel Snapshots" at "http://dev.davidsoergel.com/nexus/content/groups/snapshots"
+resolvers += "David Soergel Snapshots" at "http://dev.davidsoergel.com/nexus/content/repositories/snapshots"
 
 seq(assemblySettings: _*)
 
