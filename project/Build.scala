@@ -1,4 +1,42 @@
-import AssemblyKeys._ // put this at the top of the file
+import sbt._
+import edu.umass.cs.iesl.sbtbase.IeslProject
+import edu.umass.cs.iesl.sbtbase.IeslProject._
+import edu.umass.cs.iesl.sbtbase.Dependencies._
+
+// this is just an example, to show how simple a build can be once all the boilerplate stuff is factored out.
+
+object Pdf2MetaWebBuild extends Build {
+
+  val vers = "0.1-SNAPSHOT"
+
+  val deps = Seq(
+
+    ieslScalaCommons("latest.integration"),
+    bibmogrify("latest.integration"),
+  pdf2meta("latest.integration"),
+  liftWebkit(),liftMapper(),liftWizard(),scalatest(),classutil(),jetty()
+  //jettyContainer(),
+  )
+
+
+  lazy val pdf2metaWeb = IeslProject("pdf2meta-web ", vers, deps, Public,WithSnapshotDependencies)
+    .settings(addCompilerPlugin("org.scala-tools.subcut" %% "subcut" % "1.0"))
+ /*   .settings((resourceGenerators in Compile <+= (resourceManaged, baseDirectory) map
+    { (managedBase, base) =>
+      val webappBase = base / "src" / "main" / "webapp"
+      for {
+        (from, to) <- webappBase ** "*" x rebase(webappBase, managedBase /
+          "main" / "webapp")
+      } yield {
+        Sync.copy(from, to)
+        to
+      }
+    }))*/
+
+}
+
+/*
+//import AssemblyKeys._ // put this at the top of the file
 
 name := "pdf2meta-web"
 
@@ -32,9 +70,9 @@ resolvers += "David Soergel Repo" at "http://dev.davidsoergel.com/nexus/content/
 
 resolvers += "David Soergel Snapshots" at "http://dev.davidsoergel.com/nexus/content/repositories/snapshots"
 
-seq(assemblySettings: _*)
+//seq(assemblySettings: _*)
 
-seq(webSettings :_*)
+//seq(webSettings :_*)
 
 addCompilerPlugin("org.scala-tools.subcut" %% "subcut" % "1.0")
 
@@ -74,3 +112,5 @@ credentials +=
                                       Credentials(Path.userHome / ".ivy2" / ".credentials")
                                   }
                                   }
+
+*/
