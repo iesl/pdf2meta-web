@@ -1,3 +1,4 @@
+import com.github.siasia.WebPlugin
 import sbt._
 import edu.umass.cs.iesl.sbtbase.IeslProject
 import edu.umass.cs.iesl.sbtbase.IeslProject._
@@ -13,14 +14,20 @@ object Pdf2MetaWebBuild extends Build {
 
     ieslScalaCommons("latest.integration"),
     bibmogrify("latest.integration"),
-  pdf2meta("latest.integration"),
-  liftWebkit(),liftMapper(),liftWizard(),scalatest(),classutil(),jetty()
-  //jettyContainer(),
+    pdf2meta("latest.integration"),
+    liftWebkit(),
+    liftMapper(),
+    liftWizard(),
+    scalatest(),
+    classutil(),
+    jetty("6.1.26"),
+    jettyContainer("6.1.26")
   )
 
 
   lazy val pdf2metaWeb = IeslProject("pdf2meta-web ", vers, deps, Public,WithSnapshotDependencies)
     .settings(addCompilerPlugin("org.scala-tools.subcut" %% "subcut" % "1.0"))
+    .settings(WebPlugin.webSettings :_*)
  /*   .settings((resourceGenerators in Compile <+= (resourceManaged, baseDirectory) map
     { (managedBase, base) =>
       val webappBase = base / "src" / "main" / "webapp"
