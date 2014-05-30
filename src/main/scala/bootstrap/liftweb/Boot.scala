@@ -3,13 +3,15 @@ package bootstrap.liftweb
 import net.liftweb._
 import common._
 import edu.umass.cs.iesl.pdf2meta.webapp.lib.ImageLogic
-import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.ShowPdfComponent
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.{ShowMetataggerComponent, ShowPdfComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import http._
 import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenterComponent, AlignedPerceptronCoarseSegmenterComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
 import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, StandardScoringModel}
+import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.MetataggerExtractor
+
 //import org.scala_tools.subcut.inject.NewBindingModule
 import com.escalatesoft.subcut.inject.NewBindingModule
 //import NewBindingModule._
@@ -36,6 +38,10 @@ class Boot {
 
     LiftRules.snippets.append({
       case List("showpdf") => new WiredApp.ShowPdf()
+    })
+
+    LiftRules.snippets.append({
+      case List("showmetatagger") => new WiredAppMetatagger.ShowMetatagger()
     })
 
     LiftRules.snippets.append({
@@ -106,6 +112,33 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 
   }
 
+
+
+  val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent {
+    lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent {
+      lazy val scoringModel = StandardScoringModel
+    }
+    lazy val segmentSmoother = new BestCoarseLabelModelAligner {
+      val coarseLabelModels = List(new StandardCoarseLabelModel) //, new LetterCoarseLabelModel)
+    }
+  }
+
+  val pipeline = new Pipeline;
+}
+
+
+//kzaporojets: configuration for being used with the output produced by metatagger
+object WiredAppMetatagger extends ShowMetataggerComponent with WebPipelineComponent {
+
+  val pdfExtractor = new PdfBoxExtractor
+  //val pdfExtractor = new PdfMinerExtractor
+
+  val docTransformer = new DocTransformerPipelineComponent {
+    val transformers = List(
+      new MetataggerExtractor
+    )
+
+  }
   val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent {
     lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent {
       lazy val scoringModel = StandardScoringModel
