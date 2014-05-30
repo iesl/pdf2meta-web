@@ -1,11 +1,13 @@
 package edu.umass.cs.iesl.pdf2meta.webapp.lib
 
 import sys.process.{ProcessIO, Process}
-import com.weiglewilczek.slf4s.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 import scala.None
 import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
 import edu.umass.cs.iesl.scalacommons.Workspace
-import org.scala_tools.subcut.inject.AutoInjectable
+//import org.scala_tools.subcut.inject.AutoInjectable
+import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+
 import tools.nsc.io.File
 
 /*
@@ -14,7 +16,7 @@ import tools.nsc.io.File
  * Date: 9/2/11
  * Time: 11:50 AM
  */
-class PdfToJpg(w: Workspace) extends Logging with AutoInjectable
+class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends Logging with Injectable
 	{
 
 	val outfilebase = w.dir + "/" + w.filename + ".jpg";

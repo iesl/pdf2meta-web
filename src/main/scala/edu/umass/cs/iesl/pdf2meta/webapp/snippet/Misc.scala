@@ -46,7 +46,7 @@ class Uploader
     else
       {
       val box: Box[FileParamHolder] = theUpload.is
-      val v = box.openTheBox
+      val v = box.openOrThrowException("exception") // box.openTheBox; kzaporojets, commented
 
       if (v.mimeType != "application/pdf") S.error("Not a PDF file")
 

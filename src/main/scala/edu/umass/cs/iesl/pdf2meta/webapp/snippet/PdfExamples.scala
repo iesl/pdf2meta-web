@@ -6,7 +6,9 @@ import net.liftweb.common.Full
 import net.liftweb.util.BindHelpers._
 import tools.nsc.io.{File, Directory}
 import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.{filenameBox, filestreamBox}
-import org.scala_tools.subcut.inject.AutoInjectable
+//import org.scala_tools.subcut.inject.AutoInjectable
+import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+//import org.scala_tools.subcut.inject.AutoInjectable
 
 /*
  * Created by IntelliJ IDEA.
@@ -14,10 +16,11 @@ import org.scala_tools.subcut.inject.AutoInjectable
  * Date: 9/9/11
  * Time: 4:49 PM
  */
-class PdfExamples extends AutoInjectable
+class PdfExamples(implicit val bindingModule:BindingModule) extends Injectable
  {
 
   val exampleDirPath = inject[String]('examples)
+//  println("The path that fails is: " + exampleDirPath)
   val exampleDir = Directory(exampleDirPath)
   //val exampleDir = Directory(System.getProperty("pdf2metaExamples")) //"/Users/lorax/iesl/pdf2meta/ReadingOrderCases") //Directory("/Users/lorax/iesl/bibmogrify-project/pdf2meta-web/examplePDFs") //
 
@@ -26,11 +29,13 @@ class PdfExamples extends AutoInjectable
     // reread these on every render, to allow changing files while the server is runng
     val examples = exampleDir.files.toSeq.filter(x => !x.name.startsWith("."))
 
+//    println("examples: " + examples)
     def bindExamples(template: NodeSeq): NodeSeq = {
       examples.flatMap {
         example => {
           bind("ex", template, "url" -> {
             val ename = example.name
+//            println ("example name: " + ename)
             S.fmapFunc(() => showExample(example)) {
               linkName => {
                 val linkUrl = "test.html?" + linkName + "=_"

@@ -10,7 +10,10 @@ import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenterComponent, AlignedPerceptronCoarseSegmenterComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
 import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, StandardScoringModel}
-import org.scala_tools.subcut.inject.NewBindingModule
+//import org.scala_tools.subcut.inject.NewBindingModule
+import com.escalatesoft.subcut.inject.NewBindingModule
+//import NewBindingModule._
+//import module.NewBindingModule
 import com.davidsoergel.dsutils.PropertiesUtils
 import edu.umass.cs.iesl.pdf2meta.webapp.snippet.PdfExamples
 import edu.umass.cs.iesl.pdf2meta.cli.extract.pdfbox.{SpaceEstimator, PdfBoxExtractor}
