@@ -10,7 +10,7 @@ import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenterComponent, AlignedPerceptronCoarseSegmenterComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
 import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, StandardScoringModel}
-import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.MetataggerExtractor
+import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.{MetataggerBoxExtractor, MetataggerProcessor}
 
 //import org.scala_tools.subcut.inject.NewBindingModule
 import com.escalatesoft.subcut.inject.NewBindingModule
@@ -80,6 +80,9 @@ class Boot {
 object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 
   val pdfExtractor = new PdfBoxExtractor
+
+  //kzaporojets TODO: get rid of this part of metataggerExtractor, it is not needed for WiredApp, it is only needed for WiredAppMetatagger
+  val metataggerExtractor = new MetataggerBoxExtractor
   //val pdfExtractor = new PdfMinerExtractor
 
   val docTransformer = new DocTransformerPipelineComponent {
@@ -124,6 +127,7 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
   }
 
   val pipeline = new Pipeline;
+  val metataggerPipeline = new MetataggerPipeline;
 }
 
 
@@ -131,11 +135,13 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 object WiredAppMetatagger extends ShowMetataggerComponent with WebPipelineComponent {
 
   val pdfExtractor = new PdfBoxExtractor
+  val metataggerExtractor = new MetataggerBoxExtractor
+
   //val pdfExtractor = new PdfMinerExtractor
 
   val docTransformer = new DocTransformerPipelineComponent {
     val transformers = List(
-      new MetataggerExtractor
+      new MetataggerProcessor
     )
 
   }
@@ -149,6 +155,7 @@ object WiredAppMetatagger extends ShowMetataggerComponent with WebPipelineCompon
   }
 
   val pipeline = new Pipeline;
+  val metataggerPipeline = new MetataggerPipeline;
 }
 
 object ProjectConfiguration extends NewBindingModule({

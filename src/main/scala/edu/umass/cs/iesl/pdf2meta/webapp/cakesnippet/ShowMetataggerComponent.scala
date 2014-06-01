@@ -16,7 +16,9 @@ import edu.umass.cs.iesl.scalacommons.StreamWorkspace
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 
 import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel._
+import java.io.FileInputStream
 
+//kzaporojets: modified for metatagger
 trait ShowMetataggerComponent
 	{
 	this: WebPipelineComponent =>
@@ -29,7 +31,13 @@ trait ShowMetataggerComponent
 			{
 			// kzaporojets: comment because not compiling val w = new StreamWorkspace(filenameBox.get.openTheBox, filestreamBox.get.openTheBox)
 
-      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
+      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v2.pdf"))
+
+      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v2.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v2.xml"))
+
+
+        //use in future when integrated with the initial webpage
+        //new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
 			val length: Box[Text] = Full(Text(w.file.length.toString))
 
@@ -48,8 +56,10 @@ trait ShowMetataggerComponent
 				logger.debug("PDF image generation done ")
 				val extractTime = new Date()
 				logger.debug("PDF image generation took " + ((extractTime.getTime - startTime.getTime)) + " milliseconds")
-
-				val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = pipeline.apply(w)
+//kzaporojets: todo change here to metataggerPipeline
+//				val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = metataggerPipeline.apply(w_xml)
+        val (doc: DocNode) = metataggerPipeline.apply(w_xml)
+  //metataggerPipeline.apply(w)
 
 				logger.debug("Conversion pipeline done ")
 				val pipelineTime = new Date()

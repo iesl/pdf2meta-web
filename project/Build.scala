@@ -19,7 +19,8 @@ object Pdf2MetaWebBuild extends Build {
 
     ieslScalaCommons("latest.integration"),
     bibmogrify("latest.integration"),
-    pdf2meta("latest.integration"),
+//kzaporojets: commented
+//    pdf2meta("latest.integration"),
     liftWebkit(),
     liftMapper(),
     liftWizard(),
@@ -28,16 +29,20 @@ object Pdf2MetaWebBuild extends Build {
     jetty("6.1.26"),
     jettyContainer("6.1.26"),
     "com.escalatesoft.subcut" %% "subcut" % "2.0"//,
-//     Lifty.liftySettings : _*
 
   )
 
+  //kzaporojets, TODO: change
+  lazy val pdf2meta = file("/Users/klimzaporojets/klim/pdf2meta/pdf2meta")
 
   lazy val pdf2metaWeb = Project("pdf2meta-web", new java.io.File("."))
     .ieslSetup(vers, deps, Public,WithSnapshotDependencies,"edu.umass.cs.iesl")
     .cleanLogging.standardLogging
 //    .settings(addCompilerPlugin("com.escalatesoft.subcut" %% "subcut" % "2.0"))
     .settings(WebPlugin.webSettings :_*)
+    //kzaporojets, TODO: change
+    .dependsOn(pdf2meta)
+
 
   //val appDependencies = Seq(
   //  "com.escalatesoft.subcut" %% "subcut" % "2.0"
