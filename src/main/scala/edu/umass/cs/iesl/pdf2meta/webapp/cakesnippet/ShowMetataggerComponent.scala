@@ -57,14 +57,15 @@ trait ShowMetataggerComponent
 				val extractTime = new Date()
 				logger.debug("PDF image generation took " + ((extractTime.getTime - startTime.getTime)) + " milliseconds")
 //kzaporojets: todo change here to metataggerPipeline
-//				val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = metataggerPipeline.apply(w_xml)
-        val (doc: DocNode) = metataggerPipeline.apply(w_xml)
+//				val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = pipeline.apply(w)
+        val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = metataggerPipeline.apply(w_xml)
+
   //metataggerPipeline.apply(w)
 
 				logger.debug("Conversion pipeline done ")
 				val pipelineTime = new Date()
 				logger.debug("Conversion pipeline took " + ((pipelineTime.getTime - extractTime.getTime)) + " milliseconds")
-
+//
 				val allDelimitingBoxes: Seq[DelimitingBox] = doc.delimitingBoxes
 				val allWhitespaceBoxes: Seq[WhitespaceBox] = doc.whitespaceBoxes
 
@@ -80,11 +81,11 @@ trait ShowMetataggerComponent
 					                page =>
 						                {
 						                val rectangles: ClassifiedRectangles = classifiedRectangles.onPage(page)
-						                // val legitNonRedundant: Seq[ClassifiedRectangle] = rectangles.legitNonRedundant
+//						                // val legitNonRedundant: Seq[ClassifiedRectangle] = rectangles.legitNonRedundant
 						                val all: Seq[ClassifiedRectangle] = rectangles.raw
-						                //val legit: Seq[ClassifiedRectangle] = rectangles.legit
-						                val legit: Seq[ClassifiedRectangle] = rectangles.legit
-						                val discarded: Seq[ClassifiedRectangle] = rectangles.discarded
+//						                //val legit: Seq[ClassifiedRectangle] = rectangles.legit
+//						                val legit: Seq[ClassifiedRectangle] = rectangles.legit
+//						                val discarded: Seq[ClassifiedRectangle] = rectangles.discarded
 
 						                val image = pageimages.get(page.pagenum).imageUrl
 
@@ -108,12 +109,14 @@ trait ShowMetataggerComponent
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
 						                     "image" -> image,
 						                     "segments" -> bindSegment(all) _,
-						                     "features" -> bindFeatures(all) _,
-						                     "textboxes" -> bindTextBoxes(textBoxes) _,
-						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _,
-						                     "whitespaceboxes" -> bindWhitespaceBoxes(whitespaceBoxes) _,
-						                     "discardboxes" -> bindDiscardBoxes(discarded.map(_.node)) _,
-						                     "readingorder" -> bindReadingOrder(page, ReadingOrderPair.joinPairs(legit.map(_.node).toList)) _)
+//						                     "features" -> bindFeatures(all) _,
+						                     "textboxes" -> bindTextBoxes(textBoxes) _
+                              //,
+//						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _
+//						                     "whitespaceboxes" -> bindWhitespaceBoxes(textBoxes) _
+//						                     "discardboxes" -> bindDiscardBoxes(discarded.map(_.node)) _,
+//						                     "readingorder" -> bindReadingOrder(page, ReadingOrderPair.joinPairs(legit.map(_.node).toList)) _)
+                            )
 						                };
 					                }
 					boundPage

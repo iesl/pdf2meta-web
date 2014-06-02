@@ -98,15 +98,16 @@ trait ShowPdfComponent
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
 						                     "image" -> image , //),
                                     //text below the pages
-//						                     "segments" -> bindSegment(all) _)
+						                     "segments" -> bindSegment(all) _,
                                     //I don't know
-//						                     "features" -> bindFeatures(all) _)
-						                     "textboxes" -> bindTextBoxes(textBoxes) _ )
+//						                     "features" -> bindFeatures(all) _,
+						                     "textboxes" -> bindTextBoxes(textBoxes) _
 //						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _,
 //						                     "whitespaceboxes" -> bindWhitespaceBoxes(whitespaceBoxes) _,
 //						                     "discardboxes" -> bindDiscardBoxes(discarded.map(_.node)) _,
 //						                     "readingorder" -> bindReadingOrder(page, ReadingOrderPair.joinPairs(legit.map(_.node).toList))
-//                                  _)
+//                                        _
+                            )
 						                };
 					                }
 					boundPage
