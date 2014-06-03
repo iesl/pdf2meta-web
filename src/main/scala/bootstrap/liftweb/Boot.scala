@@ -48,20 +48,6 @@ class Boot {
       case List("pdfexamples") => new PdfExamples().render
     }) // ensure that the subcut config is passed
 
-
-    // Build SiteMap
-    /*   val entries = List(
-      Menu.i("Home") / "index", // the simple way to declare a menu
-
-      Menu.i("File Upload") / "file_upload",
-
-      Menu.i("Show examples") / "show_examples"
-                      )
-
-    // set the sitemap.  Note if you don't want access control for
-    // each page, just comment this line out.
-    LiftRules.setSiteMap(SiteMap(entries:_*))
-*/
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)

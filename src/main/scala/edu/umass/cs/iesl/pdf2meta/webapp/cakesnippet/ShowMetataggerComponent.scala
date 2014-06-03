@@ -108,6 +108,7 @@ trait ShowMetataggerComponent
 						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
 						                     "image" -> image,
+                                 "sidelabels" -> bindSidelabels(all) _,
 						                     "segments" -> bindSegment(all) _,
 //						                     "features" -> bindFeatures(all) _,
 						                     "textboxes" -> bindTextBoxes(textBoxes) _
@@ -163,7 +164,7 @@ trait ShowMetataggerComponent
 					}
 					}
 
-				bind("segment", segmentTemplate, "classification" -> x.label.getOrElse("[none]"), "text" ->
+				bind("segment", segmentTemplate, /*"classification" -> x.label.getOrElse("[none]"),*/ "text" ->
 				                                                                                  truncatedText,
 
 				     /*FuncAttrBindParam("onmouseover", (ns: NodeSeq) =>
@@ -179,6 +180,47 @@ trait ShowMetataggerComponent
 			case _                      => NodeSeq.Empty
 			}
 			}
+
+
+    private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
+    {
+      sidelabels.flatMap
+      {
+        case x: ClassifiedRectangle =>
+        {
+          //val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
+          //val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
+          val truncatedText: String =
+          {
+            val t: String = x.node.text.trim
+            val s = t.substring(0, t.length.min(200))
+            s.length match
+            {
+              case 200 => s + " ..."
+              case 0   => "EMPTY"
+              case _   => s
+            }
+          }
+
+          bind("sidelabel", segmentTemplate, /*"classification" -> x.label.getOrElse("[none]"),*/ "text" ->
+            truncatedText,
+
+            /*kzaporojets:
+			textBoxes.flatMap
+			{
+			textbox =>
+				{
+				bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox, ns), "style"),
+				     FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox, ns), "class"))
+				}
+			}
+                */
+            FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
+                    "class"),  FuncAttrBindParam("style", (ns: NodeSeq) => addCoordsLabels(x.node, ns), "style"))
+        }
+        case _                      => NodeSeq.Empty
+      }
+    }
 
 		private def bindFeatures(segments: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
 			{
@@ -329,6 +371,20 @@ trait ShowMetataggerComponent
 			     "px; height: " +
 			     rr.height + "px; ") ++ ns
 			}
+
+    private def addCoordsLabels(r: DocNode, ns: NodeSeq): NodeSeq =
+    {
+      val rr: RectangleOnPage = r.rectangle.get
+      Text("position: absolute; top: " +
+        (rr.page.rectangle.height - rr.top ) +
+        //(rr.page.rectangle.height - rr.top) +
+        "px; left: " + rr.page.rectangle.width +
+        "px; width: 396" +
+        "px; height: 23" + "px; ") ++ ns
+    }
+
 		}
 
-	}
+
+
+}
