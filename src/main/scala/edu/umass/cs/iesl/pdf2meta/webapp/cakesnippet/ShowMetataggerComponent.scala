@@ -12,6 +12,8 @@ import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import collection.Seq
 import java.util.Date
 import edu.umass.cs.iesl.scalacommons.StreamWorkspace
+import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.MetataggerBoxTextAtom
+
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 
@@ -182,9 +184,67 @@ trait ShowMetataggerComponent
 			}
 
 
+
+//    private def organizeLabels(sidelabels: Seq[ClassifiedRectangle], newSideLabels:Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
+//      val slabel: ClassifiedRectangle = sidelabels.head
+//
+//      val other = sidelabels.find(x=> ((slabel.node.rectangle.get.top > x.node.rectangle.get.bottom && slabel.node.rectangle.get.top < x.node.rectangle.get.top) ||
+//        (slabel.node.rectangle.get.bottom > x.node.rectangle.get.bottom && slabel.node.rectangle.get.bottom < x.node.rectangle.get.top)))
+//
+//      //slabel.copy(node = slabel.node.copy() )
+//
+//      if(newSideLabels.exists(x => ((slabel.node.rectangle.get.top > x.node.rectangle.get.bottom && slabel.node.rectangle.get.top < x.node.rectangle.get.top) ||
+//                                    (slabel.node.rectangle.get.bottom > x.node.rectangle.get.bottom && slabel.node.rectangle.get.bottom < x.node.rectangle.get.top)) ))
+//      {
+//        slabel+:sidelabels.tail
+//        slabel.copy()
+//      }
+//
+//
+//    }
+
+    private def organizeLabels(sidelabels: Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
+      def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (classRectangle1.node.rectangle.get.top < classRectangle2.node.rectangle.get.top)
+      val sortedLabels:Seq[ClassifiedRectangle] = sidelabels.sortWith(compfn1)
+      //sortedLabels
+      distributeLabels(sortedLabels,1)
+    }
+
+    private def distributeLabels(sortedSideLabels: Seq[ClassifiedRectangle], yCoord:Float):Seq[ClassifiedRectangle] = {
+      val headLabel:ClassifiedRectangle = sortedSideLabels.head
+
+      val repositionedHeadLabel:ClassifiedRectangle = headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+        new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+        override val bottom: Float = yCoord + 23
+        override val top: Float = yCoord
+        override val left: Float = headLabel.node.rectangle.get.left
+        override val right: Float = headLabel.node.rectangle.get.right
+      }, Array[Float](0f)))
+
+      /*
+      new DelimitingBox((currentNode \ "@llx").text + (currentNode \ "@lly").text +
+              (currentNode \ "@urx").text + (currentNode \ "@ury").text, new RectangleOnPage {
+              override val page: Page = new Page(1,pageDimensions)
+              override val bottom: Float = (currentNode \ "@lly").text.toFloat
+              override val top: Float = (currentNode \ "@ury").text.toFloat
+              override val left: Float = (currentNode \ "@llx").text.toFloat
+              override val right: Float = (currentNode \ "@urx").text.toFloat
+            }
+      * */
+      if(sortedSideLabels.size>1)
+      {
+        val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord+25)
+        repositionedHeadLabel+:distributedL
+      }
+      else
+      {
+        List(repositionedHeadLabel)
+      }
+      //distributedL
+    }
     private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
     {
-      sidelabels.flatMap
+      organizeLabels(sidelabels).flatMap
       {
         case x: ClassifiedRectangle =>
         {
@@ -202,21 +262,13 @@ trait ShowMetataggerComponent
             }
           }
 
-          bind("sidelabel", segmentTemplate, /*"classification" -> x.label.getOrElse("[none]"),*/ "text" ->
-            truncatedText,
+         // val res = addCoordsLabels(x.node)
 
-            /*kzaporojets:
-			textBoxes.flatMap
-			{
-			textbox =>
-				{
-				bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox, ns), "style"),
-				     FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox, ns), "class"))
-				}
-			}
-                */
+          bind("sidelabel", segmentTemplate, "text" ->
+            truncatedText,
             FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
-                    "class"),  FuncAttrBindParam("style", (ns: NodeSeq) => addCoordsLabels(x.node, ns), "style"))
+                    "class"),  FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
+          //val res = addCoordsLabels(x.node, ns)
         }
         case _                      => NodeSeq.Empty
       }
