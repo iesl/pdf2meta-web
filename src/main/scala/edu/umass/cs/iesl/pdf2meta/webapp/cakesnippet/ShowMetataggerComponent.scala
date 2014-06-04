@@ -35,7 +35,7 @@ trait ShowMetataggerComponent
 
       val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v2.pdf"))
 
-      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v2.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v2.xml"))
+      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
 
 
         //use in future when integrated with the initial webpage
@@ -111,7 +111,7 @@ trait ShowMetataggerComponent
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
 						                     "image" -> image,
                                  "sidelabels" -> bindSidelabels(all) _,
-						                     "segments" -> bindSegment(all) _,
+//						                     "segments" -> bindSegment(all) _,
 //						                     "features" -> bindFeatures(all) _,
 						                     "textboxes" -> bindTextBoxes(textBoxes) _
                               //,
@@ -294,7 +294,6 @@ trait ShowMetataggerComponent
         }
 
       }
-      //distributedL
     }
     private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
     {
@@ -465,7 +464,7 @@ trait ShowMetataggerComponent
 			}
 			}
 
-		private def addId(r: DocNode, ns: NodeSeq): NodeSeq = Text(r.id + " ") ++ ns
+		private def addId(r: DocNode, ns: NodeSeq): NodeSeq = Text(r.id.replaceAll(" ", "") + " ") ++ ns
 
 		private def addCoords(r: DocNode, ns: NodeSeq): NodeSeq =
 			{
@@ -485,7 +484,7 @@ trait ShowMetataggerComponent
         (rr.page.rectangle.height - rr.top ) +
         //(rr.page.rectangle.height - rr.top) +
         "px; left: " + rr.page.rectangle.width +
-        "px; width: 396" +
+        "px; width: 150" +
         "px; height: 23" + "px; ") ++ ns
     }
 
