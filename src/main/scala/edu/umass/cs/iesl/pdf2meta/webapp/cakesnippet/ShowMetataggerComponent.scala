@@ -203,23 +203,38 @@ trait ShowMetataggerComponent
 //
 //    }
 
+
+    private def getDistinctLabels(sidelabels:Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
+      if(sidelabels.size>1)
+      {
+        //sidelabels.tail.exists(x => x.node.id == sidelabels.head.node.id)
+        val recValue = getDistinctLabels(sidelabels.tail)
+        if(recValue.exists(x => x.node.id == sidelabels.head.node.id))
+        {
+          recValue
+        }
+        else
+        {
+          sidelabels.head +: recValue
+        }
+      }
+      else
+      {
+        sidelabels;
+      }
+    }
+
     private def organizeLabels(sidelabels: Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
-      def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (classRectangle1.node.rectangle.get.top < classRectangle2.node.rectangle.get.top)
+      def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (classRectangle1.node.rectangle.get.top > classRectangle2.node.rectangle.get.top)
       val sortedLabels:Seq[ClassifiedRectangle] = sidelabels.sortWith(compfn1)
       //sortedLabels
-      distributeLabels(sortedLabels,1)
+      distributeLabels(sortedLabels,sortedLabels(0).node.rectangle.get.page.rectangle.height)
     }
 
     private def distributeLabels(sortedSideLabels: Seq[ClassifiedRectangle], yCoord:Float):Seq[ClassifiedRectangle] = {
       val headLabel:ClassifiedRectangle = sortedSideLabels.head
 
-      val repositionedHeadLabel:ClassifiedRectangle = headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
-        new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-        override val bottom: Float = yCoord + 23
-        override val top: Float = yCoord
-        override val left: Float = headLabel.node.rectangle.get.left
-        override val right: Float = headLabel.node.rectangle.get.right
-      }, Array[Float](0f)))
+
 
       /*
       new DelimitingBox((currentNode \ "@llx").text + (currentNode \ "@lly").text +
@@ -233,18 +248,57 @@ trait ShowMetataggerComponent
       * */
       if(sortedSideLabels.size>1)
       {
-        val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord+25)
-        repositionedHeadLabel+:distributedL
+        if(yCoord>headLabel.node.rectangle.get.top)
+        {
+          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, headLabel.node.rectangle.get.top-25)
+          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+              override val bottom: Float = headLabel.node.rectangle.get.top + 23
+              override val top: Float = headLabel.node.rectangle.get.top
+              override val left: Float = headLabel.node.rectangle.get.left
+              override val right: Float = headLabel.node.rectangle.get.right
+            }, Array[Float](0f)))+:distributedL
+        }
+        else
+        {
+          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-25)
+          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+              override val bottom: Float = yCoord + 23
+              override val top: Float = yCoord
+              override val left: Float = headLabel.node.rectangle.get.left
+              override val right: Float = headLabel.node.rectangle.get.right
+            }, Array[Float](0f)))+:distributedL
+        }
       }
       else
       {
-        List(repositionedHeadLabel)
+        if(yCoord>headLabel.node.rectangle.get.top) {
+          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+              override val bottom: Float = headLabel.node.rectangle.get.top + 23
+              override val top: Float = headLabel.node.rectangle.get.top
+              override val left: Float = headLabel.node.rectangle.get.left
+              override val right: Float = headLabel.node.rectangle.get.right
+            }, Array[Float](0f))))
+        }
+        else
+        {
+          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+              override val bottom: Float = yCoord + 23
+              override val top: Float = yCoord
+              override val left: Float = headLabel.node.rectangle.get.left
+              override val right: Float = headLabel.node.rectangle.get.right
+            }, Array[Float](0f))))
+        }
+
       }
       //distributedL
     }
     private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
     {
-      organizeLabels(sidelabels).flatMap
+      organizeLabels(getDistinctLabels(sidelabels)).flatMap
       {
         case x: ClassifiedRectangle =>
         {
