@@ -21,38 +21,32 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 
   val filePath = inject[String]('pstotext_path)
 
-  val outfilebase = filePath + "/" + w.filename + ".xml";
+  val outFilePsToText = filePath + "/" + w.filename + ".xml";
 
-  val outfileruncrfbase = filePath + "/" + w.filename + "_runcrf.xml";
+  val outFileRunCrf = filePath + "/" + w.filename + "_runcrf.xml";
+  val outFilenameRunCrf = w.filename + "_runcrf.xml";
   val convertPath:String = inject[String]('pstotext)
 
   val runcrfFilePath = inject[String]('runcrf_path)
 
   val output =
   {
-    try
-    {
-    val result = (convertPath + " " + w.file).toString #> new java.io.File(outfilebase) !
+    val result = (convertPath + " " + w.file).toString #> new java.io.File(outFilePsToText) !
 
     if(result!=0)
     {
       throw new PdfConversionException("Error while executing pstotext")
     }
-        result
-    }catch
-    {
-      case e: Exception => println("exception caught: " + e);
-    }
-
+    result
   }
-  val f = new java.io.File(outfilebase)
+  val f = new java.io.File(outFilePsToText)
   if(!f.exists)
   {
-    throw new PdfConversionException("no xml file to parse found: " + outfilebase)
+    throw new PdfConversionException("no xml file to parse found: " + outFilePsToText)
   }
 
 //  sys.process.Process(Seq("sbt", "update"), new java.io.File("/path/to/project")).!!
-  val resRuncrf = (sys.process.Process(Seq("echo", outfilebase + " -> " + outfileruncrfbase)) #| sys.process.Process("bin/runcrf", new java.io.File(runcrfFilePath))).!!
+  val resRuncrf = (sys.process.Process(Seq("echo", outFilePsToText + " -> " + outFileRunCrf)) #| sys.process.Process("bin/runcrf", new java.io.File(runcrfFilePath))).!!
 
   println(resRuncrf)
   //now invokes metatagger

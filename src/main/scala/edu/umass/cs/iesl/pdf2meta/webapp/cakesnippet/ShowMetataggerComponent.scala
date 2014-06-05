@@ -36,7 +36,7 @@ trait ShowMetataggerComponent
       val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
       val psToText: PsToText = new PsToText(w)
-      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
+      val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
 
 
         //use in future when integrated with the initial webpage

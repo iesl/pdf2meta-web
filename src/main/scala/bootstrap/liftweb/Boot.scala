@@ -17,7 +17,7 @@ import com.escalatesoft.subcut.inject.NewBindingModule
 //import NewBindingModule._
 //import module.NewBindingModule
 import com.davidsoergel.dsutils.PropertiesUtils
-import edu.umass.cs.iesl.pdf2meta.webapp.snippet.PdfExamples
+import edu.umass.cs.iesl.pdf2meta.webapp.snippet.{MetataggerExamples, PdfExamples}
 import edu.umass.cs.iesl.pdf2meta.cli.extract.pdfbox.{SpaceEstimator, PdfBoxExtractor}
 import edu.umass.cs.iesl.pdf2meta.cli.pagetransform._
 import edu.umass.cs.iesl.pdf2meta.cli.extract.PdfMinerExtractor
@@ -48,7 +48,7 @@ class Boot {
       case List("pdfexamples") => new PdfExamples().render
     }) // ensure that the subcut config is passed
     LiftRules.snippets.append({
-      case List("pdfexamplesmetatagger") => new PdfExamples().render
+      case List("pdfexamplesmetatagger") => new MetataggerExamples().render
     }) // ensure that the subcut config is passed
 
     //Show the spinny image when an Ajax call starts
