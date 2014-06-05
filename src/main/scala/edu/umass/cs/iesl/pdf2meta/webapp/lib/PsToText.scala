@@ -1,4 +1,68 @@
 package edu.umass.cs.iesl.pdf2meta.webapp.lib
+//import sys.process.{ProcessIO, Process}
+import sys.process._
+import java.io.File
+import com.typesafe.scalalogging.slf4j.Logging
+import scala.None
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
+import edu.umass.cs.iesl.scalacommons.Workspace
+//import org.scala_tools.subcut.inject.AutoInjectable
+import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+
+import tools.nsc.io.File
+/**
+ * Created by klimzaporojets on 6/5/14.
+ * Invokes psToText on a particular pdf file
+ */
+class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends Logging with Injectable {
+
+
+  println(inject[String]('examples))
+
+  val filePath = inject[String]('pstotext_path)
+
+  val outfilebase = filePath + "/" + w.filename + ".xml";
+
+  val outfileruncrfbase = filePath + "/" + w.filename + "_runcrf.xml";
+  val convertPath:String = inject[String]('pstotext)
+
+  val runcrfFilePath = inject[String]('runcrf_path)
+
+  val output =
+  {
+    try
+    {
+    val result = (convertPath + " " + w.file).toString #> new java.io.File(outfilebase) !
+
+    if(result!=0)
+    {
+      throw new PdfConversionException("Error while executing pstotext")
+    }
+        result
+    }catch
+    {
+      case e: Exception => println("exception caught: " + e);
+    }
+
+  }
+  val f = new java.io.File(outfilebase)
+  if(!f.exists)
+  {
+    throw new PdfConversionException("no xml file to parse found: " + outfilebase)
+  }
+
+//  sys.process.Process(Seq("sbt", "update"), new java.io.File("/path/to/project")).!!
+  val resRuncrf = (sys.process.Process(Seq("echo", outfilebase + " -> " + outfileruncrfbase)) #| sys.process.Process("bin/runcrf", new java.io.File(runcrfFilePath))).!!
+
+  println(resRuncrf)
+  //now invokes metatagger
+
+}
+
+class PsToTextConversionException(s: String) extends Exception(s)
+
+
+/*
 
 import sys.process.{ProcessIO, Process}
 import com.typesafe.scalalogging.slf4j.Logging
@@ -34,8 +98,7 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 		val sbe = StringBuilder.newBuilder
 		val pio = new ProcessIO(_ => (), stdout => scala.io.Source.fromInputStream(stdout).getLines().foreach(sb append _),
 		                        stderr => scala.io.Source.fromInputStream(stderr).getLines().foreach(sbe append _))
-
-    val p = pb.run(pio)
+		val p = pb.run(pio)
 		val exitCode = p.exitValue()
 
 		val output = sb toString()
@@ -46,41 +109,7 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 		output
 		}
 
-	/*  lazy val outfiles: Map[Int, PageImage] =
-	  {
-	  output // just trigger the lazy evaluation
-	  val result = collection.mutable.Map[Int, PageImage]()
 
-	  val pageidRE = "-(\\d+)\\.jpg".r
-
-	  for (f <- w.dir.files)
-		{
-		try
-		{
-		val r = pageidRE findFirstIn f.segments.last;
-		r match
-		{
-		  case None =>
-		  case Some(x) =>
-			{
-			logger.debug("Found " + x)
-			val pageidRE(pageidStr) = x
-			val pageid = pageidStr.toInt + 1
-			logger.debug("Storing image mapping: " + pageid + " -> " + f)
-			result += pageid -> new PageImage(pageid, f, "image/jpg")
-			}
-		}
-		}
-		catch
-		{
-		case e: MatchError =>
-		  {
-		  logger.error("Image name match failed: " + f.segments.last)
-		  } // ignore
-		}
-		}
-	  result.toMap
-	  }*/
 	val outfiles: Map[Int, PageImage] =
 		{
 		val pageidRE = "-(\\d+)\\.jpg".r
@@ -127,3 +156,5 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 	}
 
 class PdfConversionException(s: String) extends Exception(s)
+
+* */
