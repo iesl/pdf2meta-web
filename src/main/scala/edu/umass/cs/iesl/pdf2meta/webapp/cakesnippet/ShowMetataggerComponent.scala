@@ -209,9 +209,19 @@ trait ShowMetataggerComponent
       {
         //sidelabels.tail.exists(x => x.node.id == sidelabels.head.node.id)
         val recValue = getDistinctLabels(sidelabels.tail)
-        if(recValue.exists(x => x.node.id == sidelabels.head.node.id))
+        val headL= sidelabels.head
+        if(recValue.exists(x => x.node.id == headL.node.id))
         {
-          recValue
+          val value = recValue.find(x => x.node.id == headL.node.id)
+          if(value.get.node.rectangle.get.top < headL.node.rectangle.get.top )
+          {
+            val (left, right) = recValue.span(_.node.id != headL.node.id)
+            (headL +: left) ++ right.drop(1)
+          }
+          else
+          {
+            recValue
+          }
         }
         else
         {
@@ -224,28 +234,50 @@ trait ShowMetataggerComponent
       }
     }
 
+    //returns the maximum top value
+    private def maxValue(xs: Seq[ClassifiedRectangle]):Float = {
+      if (xs.isEmpty) 0
+      else {
+        if( xs.head.node.rectangle.get.top >= maxValue(xs.tail) ) xs.head.node.rectangle.get.top
+        else maxValue(xs.tail)
+      }
+    }
     private def organizeLabels(sidelabels: Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
-      def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (classRectangle1.node.rectangle.get.top > classRectangle2.node.rectangle.get.top)
+      def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (if (classRectangle1.node.rectangle.get.top.toInt !=classRectangle2.node.rectangle.get.top.toInt){classRectangle1.node.rectangle.get.top > classRectangle2.node.rectangle.get.top}
+                                                                                            else {classRectangle1.node.text.length < classRectangle2.node.text.length})
+//      def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (maxValue(sidelabels.filter(sl => sl.node.text == classRectangle1.node.text)) > maxValue(sidelabels.filter(sl => sl.node.text == classRectangle2.node.text)))
       val sortedLabels:Seq[ClassifiedRectangle] = sidelabels.sortWith(compfn1)
       //sortedLabels
-      distributeLabels(sortedLabels,sortedLabels(0).node.rectangle.get.page.rectangle.height)
+      //50 because of margin
+//      distributeLabels(sortedLabels, sortedLabels(0).node.rectangle.get.page.rectangle.height - 150)
+      distributeLabels(sortedLabels, sortedLabels(0).node.rectangle.get.page.rectangle.height)
     }
 
+//    private def distributeLabels(sortedSideLabels: Seq[ClassifiedRectangle], yCoord:Float):Seq[ClassifiedRectangle] = {
+//      val headLabel:ClassifiedRectangle = sortedSideLabels.head
+//
+//      val repositionedHeadLabel:ClassifiedRectangle = headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+//        new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+//          override val bottom: Float = yCoord + 23
+//          override val top: Float = yCoord
+//          override val left: Float = headLabel.node.rectangle.get.left
+//          override val right: Float = headLabel.node.rectangle.get.right
+//        }, Array[Float](0f)))
+//
+//      if(sortedSideLabels.size>1)
+//      {
+//        val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-25)
+//        repositionedHeadLabel+:distributedL
+//      }
+//      else
+//      {
+//        List(repositionedHeadLabel)
+//      }
+//      //distributedL
+//    }
     private def distributeLabels(sortedSideLabels: Seq[ClassifiedRectangle], yCoord:Float):Seq[ClassifiedRectangle] = {
       val headLabel:ClassifiedRectangle = sortedSideLabels.head
 
-
-
-      /*
-      new DelimitingBox((currentNode \ "@llx").text + (currentNode \ "@lly").text +
-              (currentNode \ "@urx").text + (currentNode \ "@ury").text, new RectangleOnPage {
-              override val page: Page = new Page(1,pageDimensions)
-              override val bottom: Float = (currentNode \ "@lly").text.toFloat
-              override val top: Float = (currentNode \ "@ury").text.toFloat
-              override val left: Float = (currentNode \ "@llx").text.toFloat
-              override val right: Float = (currentNode \ "@urx").text.toFloat
-            }
-      * */
       if(sortedSideLabels.size>1)
       {
         if(yCoord>headLabel.node.rectangle.get.top)
