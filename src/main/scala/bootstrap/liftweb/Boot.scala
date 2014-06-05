@@ -47,6 +47,9 @@ class Boot {
     LiftRules.snippets.append({
       case List("pdfexamples") => new PdfExamples().render
     }) // ensure that the subcut config is passed
+    LiftRules.snippets.append({
+      case List("pdfexamplesmetatagger") => new PdfExamples().render
+    }) // ensure that the subcut config is passed
 
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =

@@ -6,7 +6,7 @@ import net.liftweb.common.{Full, Box}
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js.JsCmd
 import scala.Predef._
-import edu.umass.cs.iesl.pdf2meta.webapp.lib.PdfToJpg
+import edu.umass.cs.iesl.pdf2meta.webapp.lib.{PsToText, PdfToJpg}
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter._
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import collection.Seq
@@ -31,10 +31,11 @@ trait ShowMetataggerComponent
 		{
 		def apply(in: NodeSeq): NodeSeq =
 			{
-			// kzaporojets: comment because not compiling val w = new StreamWorkspace(filenameBox.get.openTheBox, filestreamBox.get.openTheBox)
 
-      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v2.pdf"))
+//      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v2.pdf"))
+      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
+      val psToText: PsToText = new PsToText(w)
       val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
 
 

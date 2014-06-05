@@ -48,7 +48,11 @@ class Uploader
       val box: Box[FileParamHolder] = theUpload.is
       val v = box.openOrThrowException("exception") // box.openTheBox; kzaporojets, commented
 
-      if (v.mimeType != "application/pdf") S.error("Not a PDF file")
+      if (v.mimeType != "application/pdf")
+      {
+        println ("The following is the mimeType: " + v.mimeType)
+        S.error("Not a PDF file")
+      }
 
       filestreamBox.set(Full(v.fileStream))
       filenameBox.set(Full(v.fileName))
@@ -56,3 +60,37 @@ class Uploader
       }
     };
   }
+
+//kzaporojets: redirects to metatagger
+class Uploadertometatagger
+{
+
+  private object theUpload extends RequestVar[Box[FileParamHolder]](Empty)
+
+  // the request-local variable that hold the file parameter
+  /**
+   * Bind the appropriate XHTML to the form
+   */
+  def upload(xhtml: Group): NodeSeq =
+  {
+    if (S.get_? || theUpload.is.isEmpty)
+    {
+      bind("ul", chooseTemplate("choose", "get", xhtml), "file_upload" -> fileUpload(ul => theUpload(Full(ul))))
+    }
+    else
+    {
+      val box: Box[FileParamHolder] = theUpload.is
+      val v = box.openOrThrowException("exception") // box.openTheBox; kzaporojets, commented
+
+      if (v.mimeType != "application/pdf")
+      {
+        println ("The following is the mimeType: " + v.mimeType)
+        S.error("Not a PDF file")
+      }
+
+      filestreamBox.set(Full(v.fileStream))
+      filenameBox.set(Full(v.fileName))
+      S.redirectTo("showmetatagger")
+    }
+  };
+}
