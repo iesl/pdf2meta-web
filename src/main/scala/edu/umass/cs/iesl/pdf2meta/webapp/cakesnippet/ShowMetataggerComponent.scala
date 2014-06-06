@@ -25,24 +25,23 @@ trait ShowMetataggerComponent
 	{
 	this: WebPipelineComponent =>
 
-	// with XmlExtractorComponent with
-	// CoarseSegmenterComponent =>
 	class ShowMetatagger(implicit val bindingModule:BindingModule) extends (NodeSeq => NodeSeq) with Injectable
 		{
 		def apply(in: NodeSeq): NodeSeq =
 			{
 
-//      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v2.pdf"))
-      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
+//      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
-      val psToText: PsToText = new PsToText(w)
-      val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
+//      val psToText: PsToText = new PsToText(w)
+//      val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
+      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.pdf"))
+
+      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
 
 
-        //use in future when integrated with the initial webpage
-        //new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
-			val length: Box[Text] = Full(Text(w.file.length.toString))
+
+        val length: Box[Text] = Full(Text(w.file.length.toString))
 
 			val filename: Box[Text] = Full(Text(w.filename))
 
@@ -59,11 +58,8 @@ trait ShowMetataggerComponent
 				logger.debug("PDF image generation done ")
 				val extractTime = new Date()
 				logger.debug("PDF image generation took " + ((extractTime.getTime - startTime.getTime)) + " milliseconds")
-//kzaporojets: todo change here to metataggerPipeline
-//				val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = pipeline.apply(w)
         val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = metataggerPipeline.apply(w_xml)
 
-  //metataggerPipeline.apply(w)
 
 				logger.debug("Conversion pipeline done ")
 				val pipelineTime = new Date()
@@ -84,11 +80,8 @@ trait ShowMetataggerComponent
 					                page =>
 						                {
 						                val rectangles: ClassifiedRectangles = classifiedRectangles.onPage(page)
-//						                // val legitNonRedundant: Seq[ClassifiedRectangle] = rectangles.legitNonRedundant
 						                val all: Seq[ClassifiedRectangle] = rectangles.raw
-//						                //val legit: Seq[ClassifiedRectangle] = rectangles.legit
-//						                val legit: Seq[ClassifiedRectangle] = rectangles.legit
-//						                val discarded: Seq[ClassifiedRectangle] = rectangles.discarded
+
 
 						                val image = pageimages.get(page.pagenum).imageUrl
 
@@ -169,15 +162,6 @@ trait ShowMetataggerComponent
 
 				bind("segment", segmentTemplate, /*"classification" -> x.label.getOrElse("[none]"),*/ "text" ->
 				                                                                                  truncatedText,
-
-				     /*FuncAttrBindParam("onmouseover", (ns: NodeSeq) =>
-							  {
-							  //Script(new JsCmd
-							  //                       {def toJsCmd = ("tooltip.show(\"bogus\");")}) //" + details + "
-							  Text("tooltip.show('bogus'); return true")
-							  }, "onmouseover"),
-								 //AttrBindParam("style", "border: green 2px solid; visibility: invisible; ", "style"),
-								 */
 				     FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))), "class"))
 				}
 			case _                      => NodeSeq.Empty
