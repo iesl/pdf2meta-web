@@ -13,6 +13,7 @@ import collection.Seq
 import java.util.Date
 import edu.umass.cs.iesl.scalacommons.StreamWorkspace
 import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.MetataggerBoxTextAtom
+import scala.util.matching.Regex
 
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
@@ -100,11 +101,17 @@ trait ShowMetataggerComponent
 							                                                    case Some(x) => x.page == page;
 							                                                    case None    => false;
 						                                                    })
-
+/*
+    private def bindExternalLabels(sidelabels: Seq[ClassifiedRectangle], groupSideLabels:Seq[ClassifiedRectangle],
+                                  divId:String, referencePattern:Regex, extSegmentTemplate: NodeSeq)(segmentTemplate: NodeSeq): NodeSeq =
+* */
 						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
 						                     "image" -> image,
-                                 "sidelabels" -> bindSidelabels(all) _,
+                                 "externallabels" -> bindExternalLabels(all, List(), "",
+                                   new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+                                 ) _,
+//                                 "sidelabels" -> bindSidelabels(all) _,
 //						                     "segments" -> bindSegment(all) _,
 //						                     "features" -> bindFeatures(all) _,
 						                     "textboxes" -> bindTextBoxes(textBoxes) _
@@ -311,6 +318,69 @@ trait ShowMetataggerComponent
         }
 
       }
+    }
+
+    private def bindExternalLabels(sidelabels: Seq[ClassifiedRectangle], groupSideLabels:Seq[ClassifiedRectangle],
+                                  divId:String, referencePattern:Regex)(segmentTemplate: NodeSeq): NodeSeq =
+    {
+
+        val headSidelabels = sidelabels.head
+        val id:String = headSidelabels.node.id
+  //      val referencePattern = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+       // def getDivId(divId:String, classRect:ClassifiedRectangle) = {if(divId==""){classRect.node.id}else{divId}}
+        val m4 = referencePattern.findAllIn(id)
+        if(m4.size>0)
+        {
+          val coordRef = (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum")
+
+          if(coordRef == divId)
+          {
+            bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, divId, referencePattern)(segmentTemplate)
+          }
+          else
+          {
+
+            bind("externallabel", segmentTemplate,
+              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:visible"), "style"),
+              FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+              "sidelabels" -> bindSidelabels(groupSideLabels) _ ) ++
+              {if(sidelabels.size>2) {bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, referencePattern)(segmentTemplate)}
+                    else { List()}}
+
+          }
+        }
+        else
+        {
+
+          bind("externallabel", segmentTemplate,
+            FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:visible"), "style"),
+            FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+            "sidelabels" -> bindSidelabels(List(headSidelabels)) _
+          ) ++
+          {if(sidelabels.size>2) {bindExternalLabels(sidelabels.tail, List(), id, referencePattern)(segmentTemplate)}
+            else {List()}}
+
+        }
+
+//      bindExternalLabels(sidelabels.tail, "")(segmentTemplate)
+
+
+//        sidelabels.flatMap{
+//          case x: ClassifiedRectangle =>
+//          {
+//            val sideLabelId = x.node.id
+//            println("sideLabelId: " + sideLabelId)
+//
+//            bind("externallabel", segmentTemplate, /*"text" ->
+//              truncatedText,*/
+//              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:visible"), "style"),
+//              FuncAttrBindParam("id", (ns: NodeSeq) => Text("1"), "id"),
+//                  "sidelabels" -> bindSidelabels(sidelabels) _
+//            )
+//          }
+//          case _ => NodeSeq.Empty
+//        }
+
     }
     private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
     {

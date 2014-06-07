@@ -68,7 +68,7 @@
             <pdfinfo:pages>
 
                 <div class="span-24">
-                    <div class="span-1"/>
+                    <div class="span-1"/> 
                     <div id="images" class="span-9">
                         <div page:id="main" style="position: relative; top:0; left:0; height:792px; width:612px">
                             <div id="img" style="position: absolute; top:0; left:0">
@@ -92,20 +92,24 @@
                             </page:textboxes>
 
                             <!--kzaporojets: side labels (derived from segments) 
-                        position: absolute; top: 68px; left: 612px; width: 396px; height: 23px;-->
-                            <page:sidelabels>
-                            <div sidelabel:class="span-9 last" sidelabel:style="border: medium hidden; "
-                                 onmouseover="partners=getElementsByClass(this.classList[0],document,
-                                 'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block';
-                                  return true"
-                                 onmouseout="partners=getElementsByClass(this.classList[0],document,
-                                 'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-                                 .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
-                                <div class="span-7 last top">
-                                    <sidelabel:text/>
-                                </div>
+                        position: absolute; top:  68px; left: 612px; width: 396px; height: 23px;-->
+                        <page:externallabels> 
+                            <div externallabel:id="" externallabel:style="">
+                                <externallabel:sidelabels>
+                                    <div sidelabel:class="span-9 last" sidelabel:style="border: medium hidden; "
+                                         onmouseover="partners=getElementsByClass(this.classList[0],document,
+                                         'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block';
+                                          return true"
+                                         onmouseout="partners=getElementsByClass(this.classList[0],document,
+                                         'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                         .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
+                                        <div class="span-7 last top">
+                                            <sidelabel:text/>
+                                        </div>
+                                    </div>
+                                </externallabel:sidelabels>
                             </div>
-                        </page:sidelabels>
+                        </page:externallabels>
                             <!--kzaporojets: end side labels -->
 
 
