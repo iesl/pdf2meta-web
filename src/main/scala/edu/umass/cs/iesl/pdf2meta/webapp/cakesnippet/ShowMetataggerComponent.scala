@@ -108,8 +108,8 @@ trait ShowMetataggerComponent
 						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
 						                     "image" -> image,
-                                 "externallabels" -> bindExternalLabels(all, List(), "",
-                                   new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+                                 "externallabels" -> bindExternalLabels(all, List(), "", "visible",
+                                   new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
                                  ) _,
 //                                 "sidelabels" -> bindSidelabels(all) _,
 //						                     "segments" -> bindSegment(all) _,
@@ -321,7 +321,7 @@ trait ShowMetataggerComponent
     }
 
     private def bindExternalLabels(sidelabels: Seq[ClassifiedRectangle], groupSideLabels:Seq[ClassifiedRectangle],
-                                  divId:String, referencePattern:Regex)(segmentTemplate: NodeSeq): NodeSeq =
+                                  divId:String, visibility:String, referencePattern:Regex)(segmentTemplate: NodeSeq): NodeSeq =
     {
 
         val headSidelabels = sidelabels.head
@@ -329,22 +329,23 @@ trait ShowMetataggerComponent
   //      val referencePattern = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)""", "coord1", "coord2", "coord3", "coord4", "pagenum")
        // def getDivId(divId:String, classRect:ClassifiedRectangle) = {if(divId==""){classRect.node.id}else{divId}}
         val m4 = referencePattern.findAllIn(id)
-        if(m4.size>0)
+        if(!m4.isEmpty)
         {
-          val coordRef = (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum")
+          val coordRef = "REFERENCES_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum")
 
-          if(coordRef == divId)
+          if(coordRef == divId || groupSideLabels.size==0)
           {
-            bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, divId, referencePattern)(segmentTemplate)
+            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, divId, "hidden", referencePattern)(segmentTemplate)}
+              else {List()}}
           }
           else
           {
 
             bind("externallabel", segmentTemplate,
-              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:visible"), "style"),
+              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
               FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
               "sidelabels" -> bindSidelabels(groupSideLabels) _ ) ++
-              {if(sidelabels.size>2) {bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, referencePattern)(segmentTemplate)}
+              {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, "hidden", referencePattern)(segmentTemplate)}
                     else { List()}}
 
           }
@@ -352,13 +353,31 @@ trait ShowMetataggerComponent
         else
         {
 
-          bind("externallabel", segmentTemplate,
-            FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:visible"), "style"),
-            FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
-            "sidelabels" -> bindSidelabels(List(headSidelabels)) _
-          ) ++
-          {if(sidelabels.size>2) {bindExternalLabels(sidelabels.tail, List(), id, referencePattern)(segmentTemplate)}
-            else {List()}}
+          if(divId.contains("REFERENCES")) {
+            bind("externallabel", segmentTemplate,
+              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:" + visibility), "style"),
+              FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+              "sidelabels" -> bindSidelabels(List(headSidelabels)) _
+            ) ++ {
+              if (sidelabels.size >= 2) {
+                bindExternalLabels(sidelabels.tail, List(), id, "visible", referencePattern)(segmentTemplate)
+              }
+              else {
+                List()
+              }
+            }
+          }
+          else
+          {
+            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, id, "visible", referencePattern)(segmentTemplate)}
+            else {
+              bind("externallabel", segmentTemplate,
+              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:" + visibility), "style"),
+              FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+              "sidelabels" -> bindSidelabels(groupSideLabels ++ List(headSidelabels)) _
+            )}}
+
+          }
 
         }
 
@@ -458,6 +477,7 @@ trait ShowMetataggerComponent
 			{
 			textbox =>
 				{
+          println("binding textbox: " + textbox.id)
 				bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox, ns), "style"),
 				     FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox, ns), "class"))
 				}
