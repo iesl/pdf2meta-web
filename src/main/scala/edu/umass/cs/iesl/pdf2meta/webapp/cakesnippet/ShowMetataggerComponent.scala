@@ -105,16 +105,18 @@ trait ShowMetataggerComponent
     private def bindExternalLabels(sidelabels: Seq[ClassifiedRectangle], groupSideLabels:Seq[ClassifiedRectangle],
                                   divId:String, referencePattern:Regex, extSegmentTemplate: NodeSeq)(segmentTemplate: NodeSeq): NodeSeq =
 * */
-						                bind("page", pageTemplate,
+                          val reg = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+                          val reg2 = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*reference$""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+ 						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
 						                     "image" -> image,
                                  "externallabels" -> bindExternalLabels(all, List(), "", "visible",
-                                   new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+                                   reg
                                  ) _,
 //                                 "sidelabels" -> bindSidelabels(all) _,
 //						                     "segments" -> bindSegment(all) _,
 //						                     "features" -> bindFeatures(all) _,
-						                     "textboxes" -> bindTextBoxes(textBoxes) _
+						                     "textboxes" -> bindTextBoxes(textBoxes, reg2) _
                               //,
 //						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _
 //						                     "whitespaceboxes" -> bindWhitespaceBoxes(textBoxes) _
@@ -380,26 +382,6 @@ trait ShowMetataggerComponent
           }
 
         }
-
-//      bindExternalLabels(sidelabels.tail, "")(segmentTemplate)
-
-
-//        sidelabels.flatMap{
-//          case x: ClassifiedRectangle =>
-//          {
-//            val sideLabelId = x.node.id
-//            println("sideLabelId: " + sideLabelId)
-//
-//            bind("externallabel", segmentTemplate, /*"text" ->
-//              truncatedText,*/
-//              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:visible"), "style"),
-//              FuncAttrBindParam("id", (ns: NodeSeq) => Text("1"), "id"),
-//                  "sidelabels" -> bindSidelabels(sidelabels) _
-//            )
-//          }
-//          case _ => NodeSeq.Empty
-//        }
-
     }
     private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
     {
@@ -407,8 +389,6 @@ trait ShowMetataggerComponent
       {
         case x: ClassifiedRectangle =>
         {
-          //val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
-          //val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
           val truncatedText: String =
           {
             val t: String = x.node.text.trim
@@ -421,13 +401,10 @@ trait ShowMetataggerComponent
             }
           }
 
-         // val res = addCoordsLabels(x.node)
-
           bind("sidelabel", segmentTemplate, "text" ->
             truncatedText,
             FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
                     "class"),  FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
-          //val res = addCoordsLabels(x.node, ns)
         }
         case _                      => NodeSeq.Empty
       }
@@ -471,15 +448,27 @@ trait ShowMetataggerComponent
 			}
 			}
 
-		private def bindTextBoxes(textBoxes: Seq[DocNode])(textboxTemplate: NodeSeq): NodeSeq =
+		private def bindTextBoxes(textBoxes: Seq[DocNode], referencePattern:Regex)(textboxTemplate: NodeSeq): NodeSeq =
 			{
+
 			textBoxes.flatMap
 			{
 			textbox =>
 				{
-          println("binding textbox: " + textbox.id)
-				bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox, ns), "style"),
-				     FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox, ns), "class"))
+          val m4 = referencePattern.findAllIn(textbox.id)
+          if(!m4.isEmpty)
+          {
+            println("bound textbox to: " + textbox.id)
+            bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox, ns), "style"),
+              FuncAttrBindParam("class", (ns: NodeSeq) => Text("REFERENCES_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum"))
+              /*(ns: NodeSeq) => addId(textbox, ns)*/, "class"))
+          }
+          else
+          {
+            //println("binding textbox: " + textbox.id)
+            bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox, ns), "style"),
+               FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox, ns), "class"))
+          }
 				}
 			}
 			}
