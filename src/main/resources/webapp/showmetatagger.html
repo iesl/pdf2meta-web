@@ -83,9 +83,10 @@
 
                                      onmouseover="partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-								     .border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; document.getElementById(this.classList[0]).style.visibility = 'visible'; return true" onclick="partners=getElementsByClass(this.classList[0],document,
+								     .border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; document.getElementById(this.classList[0]).style.visibility = 'visible'; return true" onclick=" if(chosen &amp;&amp; chosen!=''){partners=getElementsByClass(chosen); if(partners){for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                     .border='hidden';} document.getElementById(chosen).style.display = 'none';}};  partners=getElementsByClass(this.classList[0],document,
                                      'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-                                     .border='blue 2px solid';}; document.getElementById(this.classList[0]).style.position='absolute'; document.getElementById(this.classList[0]).style.display = 'block'; document.getElementById(this.classList[0]).style.border='blue 2px solid'; chosen=this.classList[0]; return true"
+                                     .border='blue 2px solid';}; document.getElementById(this.classList[0]).style.display = 'block'; chosen=this.classList[0]; return true"
 
                                      onmouseout="if(chosen != this.classList[0]){partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
