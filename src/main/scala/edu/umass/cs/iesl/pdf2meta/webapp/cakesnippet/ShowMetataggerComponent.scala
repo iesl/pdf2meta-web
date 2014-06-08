@@ -364,10 +364,10 @@ trait ShowMetataggerComponent
             bind("externallabel", segmentTemplate,
               FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:" + visibility), "style"),
               FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
-              "sidelabels" -> bindSidelabels(List(headSidelabels)) _
+              "sidelabels" -> bindSidelabels(groupSideLabels) _
             ) ++ {
               if (sidelabels.size >= 2) {
-                bindExternalLabels(sidelabels.tail, List(), id, "visible", referencePattern)(segmentTemplate)
+                bindExternalLabels(sidelabels.tail, List(headSidelabels), id, "visible", referencePattern)(segmentTemplate)
               }
               else {
                 List()
