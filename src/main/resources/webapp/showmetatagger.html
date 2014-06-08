@@ -1,4 +1,7 @@
 <lift:surround with="default" at="content">
+    <script type="text/javascript">
+            var chosen = "";
+    </script>
     <lift:showmetatagger>
         <p>
             File name:
@@ -80,10 +83,13 @@
 
                                      onmouseover="partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-								     .border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; document.getElementById(this.classList[0]).style.visibility = 'visible'; return true"
-                                     onmouseout="partners=getElementsByClass(this.classList[0],document,
+								     .border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; document.getElementById(this.classList[0]).style.visibility = 'visible'; return true" onclick="partners=getElementsByClass(this.classList[0],document,
+                                     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                     .border='blue 2px solid';}; document.getElementById(this.classList[0]).style.position='absolute'; document.getElementById(this.classList[0]).style.display = 'block'; document.getElementById(this.classList[0]).style.border='blue 2px solid'; chosen=this.classList[0]; return true"
+
+                                     onmouseout="if(chosen != this.classList[0]){partners=getElementsByClass(this.classList[0],document,
 								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
-								     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
+								     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none';} return true">
                                     <!--onmouseover="this.style.border='red 2px solid'; return true"
                                                                                   onmouseout="this.style.border='green 2px
                                                                                   solid'; return true">-->
@@ -94,13 +100,15 @@
                             <!--kzaporojets: side labels (derived from segments) 
                         position: absolute; top:  68px; left: 612px; width: 396px; height: 23px;-->
                         <page:externallabels> 
-                            <div externallabel:id="" externallabel:style="">
+                            <div externallabel:id="" externallabel:style="border: medium hidden;">
                                 <externallabel:sidelabels>
                                     <div sidelabel:class="span-9 last" sidelabel:style="border: medium hidden; "
-                                         onmouseover="partners=getElementsByClass(this.classList[0],document,
+                                         onmouseover="elems=getElementsByClass(this.classList[0].match(/REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)/gi),document,'div'); if(elems &amp;&amp; elems.length>0){elems[0].style
+                                         .border='hidden'}; partners=getElementsByClass(this.classList[0],document,
                                          'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; 
                                           return true"
-                                         onmouseout="partners=getElementsByClass(this.classList[0],document,
+                                         onmouseout="elems=getElementsByClass(this.classList[0].match(/REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)/gi),document,'div'); if(elems &amp;&amp; elems.length>0){elems[0].style
+                                         .border='blue 2px solid'};partners=getElementsByClass(this.classList[0],document,
                                          'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
                                          .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
                                         <div class="span-7 last top">

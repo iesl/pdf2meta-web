@@ -197,16 +197,16 @@ trait ShowMetataggerComponent
 //
 //    }
 
-
-    private def getDistinctLabels(sidelabels:Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
+    private def getDistinctLabels(sidelabels:Seq[ClassifiedRectangle], labelsToIgnore:Seq[String]):Seq[ClassifiedRectangle] = {
       if(sidelabels.size>1)
       {
         //sidelabels.tail.exists(x => x.node.id == sidelabels.head.node.id)
-        val recValue = getDistinctLabels(sidelabels.tail)
+        val recValue = getDistinctLabels(sidelabels.tail,labelsToIgnore)
         val headL= sidelabels.head
         if(recValue.exists(x => x.node.id == headL.node.id))
         {
           val value = recValue.find(x => x.node.id == headL.node.id)
+
           if(value.get.node.rectangle.get.top < headL.node.rectangle.get.top )
           {
             val (left, right) = recValue.span(_.node.id != headL.node.id)
@@ -216,6 +216,10 @@ trait ShowMetataggerComponent
           {
             recValue
           }
+        }
+        else if (labelsToIgnore.exists(x=> x==headL.node.text))
+        {
+            recValue
         }
         else
         {
@@ -333,29 +337,30 @@ trait ShowMetataggerComponent
         val m4 = referencePattern.findAllIn(id)
         if(!m4.isEmpty)
         {
-          val coordRef = "REFERENCES_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum")
+          val coordRef = "REFERENCE_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum")
 
           if(coordRef == divId || groupSideLabels.size==0)
           {
-            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, divId, "hidden", referencePattern)(segmentTemplate)}
-              else {List()}}
+            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, coordRef, "hidden", referencePattern)(segmentTemplate)}
+              else { bind("externallabel", segmentTemplate,
+              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+              FuncAttrBindParam("id", (ns: NodeSeq) => Text(coordRef), "id"),
+              "sidelabels" -> bindSidelabels(groupSideLabels) _ )}}
           }
           else
           {
-
-            bind("externallabel", segmentTemplate,
-              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
-              FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
-              "sidelabels" -> bindSidelabels(groupSideLabels) _ ) ++
-              {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, "hidden", referencePattern)(segmentTemplate)}
-                    else { List()}}
-
+              bind("externallabel", segmentTemplate,
+                FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+                "sidelabels" -> bindSidelabels(groupSideLabels) _ ) ++
+                {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, "hidden", referencePattern)(segmentTemplate)}
+                      else { List()}}
           }
         }
         else
         {
 
-          if(divId.contains("REFERENCES")) {
+          if(divId.contains("REFERENCE")) {
             bind("externallabel", segmentTemplate,
               FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:" + visibility), "style"),
               FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
@@ -385,7 +390,7 @@ trait ShowMetataggerComponent
     }
     private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
     {
-      organizeLabels(getDistinctLabels(sidelabels)).flatMap
+      organizeLabels(getDistinctLabels(sidelabels, List("REFERENCES"))).flatMap
       {
         case x: ClassifiedRectangle =>
         {
@@ -400,11 +405,16 @@ trait ShowMetataggerComponent
               case _   => s
             }
           }
-
-          bind("sidelabel", segmentTemplate, "text" ->
-            truncatedText,
-            FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
-                    "class"),  FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
+//          if(truncatedText!="REFERENCES") {
+            bind("sidelabel", segmentTemplate, "text" ->
+              truncatedText,
+              FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
+                "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
+//          }
+//          else
+//          {
+//            NodeSeq.Empty
+//          }
         }
         case _                      => NodeSeq.Empty
       }
@@ -460,7 +470,7 @@ trait ShowMetataggerComponent
           {
             println("bound textbox to: " + textbox.id)
             bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox, ns), "style"),
-              FuncAttrBindParam("class", (ns: NodeSeq) => Text("REFERENCES_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum"))
+              FuncAttrBindParam("class", (ns: NodeSeq) => Text("REFERENCE_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum"))
               /*(ns: NodeSeq) => addId(textbox, ns)*/, "class"))
           }
           else
