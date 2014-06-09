@@ -31,13 +31,13 @@ trait ShowMetataggerComponent
 		def apply(in: NodeSeq): NodeSeq =
 			{
 
-//      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
+      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
-//      val psToText: PsToText = new PsToText(w)
-//      val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
-      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.pdf"))
-
-      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
+      val psToText: PsToText = new PsToText(w)
+      val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
+//      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.pdf"))
+//
+//      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
 
 
 
@@ -116,7 +116,8 @@ trait ShowMetataggerComponent
 //                                 "sidelabels" -> bindSidelabels(all) _,
 //						                     "segments" -> bindSegment(all) _,
 //						                     "features" -> bindFeatures(all) _,
-						                     "textboxes" -> bindTextBoxes(textBoxes, reg2) _
+						                     "textboxes" -> bindTextBoxes(textBoxes, reg2) _,
+                                 "pagenumber" ->  Text("---- Page " + page.pagenum + " ----")
                               //,
 //						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _
 //						                     "whitespaceboxes" -> bindWhitespaceBoxes(textBoxes) _

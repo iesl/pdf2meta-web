@@ -23,6 +23,18 @@
   font-weight: normal;
 }
 
+/* For great looking type, use this code instead of asdf:
+   <span class="alt">asdf</span>
+   Best used on prepositions and ampersands. */
+
+.alt2 {
+  color: #666;
+  font-family:"Helvetica", "Times new Roman", "Arial", Georgia, serif;
+  font-style: bold;
+  font-weight: normal;
+  font-size: 20px;
+}
+
 
 /* For great looking quote marks in titles, replace "asdf" with:
    <span class="dquo">&#8220;</span>asdf&#8221;
