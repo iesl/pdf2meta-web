@@ -590,7 +590,7 @@ trait ShowMetataggerComponent
         (rr.page.rectangle.height - rr.top ) +
         //(rr.page.rectangle.height - rr.top) +
         "px; left: " + rr.page.rectangle.width +
-        "px; width: 700" +
+        "px; width: 300" +
         "px; height: 23" + "px; ") ++ ns
     }
 
