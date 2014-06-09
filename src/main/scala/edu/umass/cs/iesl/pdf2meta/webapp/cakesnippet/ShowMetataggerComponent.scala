@@ -281,7 +281,7 @@ trait ShowMetataggerComponent
         if(yCoord>headLabel.node.rectangle.get.top)
         {
           val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, headLabel.node.rectangle.get.top-25)
-          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
             new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
               override val bottom: Float = headLabel.node.rectangle.get.top + 23
               override val top: Float = headLabel.node.rectangle.get.top
@@ -292,7 +292,7 @@ trait ShowMetataggerComponent
         else
         {
           val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-25)
-          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
             new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
               override val bottom: Float = yCoord + 23
               override val top: Float = yCoord
@@ -304,7 +304,7 @@ trait ShowMetataggerComponent
       else
       {
         if(yCoord>headLabel.node.rectangle.get.top) {
-          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
             new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
               override val bottom: Float = headLabel.node.rectangle.get.top + 23
               override val top: Float = headLabel.node.rectangle.get.top
@@ -314,7 +314,7 @@ trait ShowMetataggerComponent
         }
         else
         {
-          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
+          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
             new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
               override val bottom: Float = yCoord + 23
               override val top: Float = yCoord
@@ -590,7 +590,7 @@ trait ShowMetataggerComponent
         (rr.page.rectangle.height - rr.top ) +
         //(rr.page.rectangle.height - rr.top) +
         "px; left: " + rr.page.rectangle.width +
-        "px; width: 150" +
+        "px; width: 700" +
         "px; height: 23" + "px; ") ++ ns
     }
 
