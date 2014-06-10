@@ -16,7 +16,7 @@ import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
  * Date: 9/9/11
  * Time: 4:49 PM
  */
-class PdfExamples(implicit val bindingModule:BindingModule) extends Injectable
+class MetataggerExamples(implicit val bindingModule:BindingModule) extends Injectable
  {
 
   val exampleDirPath = inject[String]('examples)
@@ -26,19 +26,19 @@ class PdfExamples(implicit val bindingModule:BindingModule) extends Injectable
 
 
   def render(in: NodeSeq): NodeSeq = {
-//    println("Hello world!")
-//    NodeSeq.Empty
     // reread these on every render, to allow changing files while the server is runng
     val examples = exampleDir.files.toSeq.filter(x => !x.name.startsWith("."))
 
+//    println("examples: " + examples)
     def bindExamples(template: NodeSeq): NodeSeq = {
       examples.flatMap {
         example => {
           bind("ex", template, "url" -> {
             val ename = example.name
+//            println ("example name: " + ename)
             S.fmapFunc(() => showExample(example)) {
               linkName => {
-                val linkUrl = "test.html?" + linkName + "=_"
+                val linkUrl = "pdfexamplesmetatagger?" + linkName + "=_"
                 <a href={linkUrl}>
                   {ename}
                 </a>
@@ -55,6 +55,6 @@ class PdfExamples(implicit val bindingModule:BindingModule) extends Injectable
   def showExample(v: File): NodeSeq = {
     filestreamBox.set(Full(v.inputStream()))
     filenameBox.set(Full(v.name))
-    S.redirectTo("showpdf")
+    S.redirectTo("showmetatagger")
   }
 }

@@ -1,17 +1,17 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:lift="http://liftweb.net/">
+<!--<html xmlns="http://www.w3.org/1999/xhtml" xmlns:lift="http://liftweb.net/">-->
+<html>
 <head>
+	
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-	<meta name="description" content=""/>
+	<meta name="description" content="nioqui"/>
 	<meta name="keywords" content=""/>
 
 	<title>Pdf2Meta Visualizer : 0.1-SNAPSHOT</title>
-	<!--<lift:CSS.blueprint />  <lift:CSS.fancyType/>-->
 
 	<link type="text/css" media="screen, projection" rel="stylesheet" href="/static/blueprint/screen.css"/>
 	<link type="text/css" media="print" rel="stylesheet" href="/static/blueprint/print.css"/>
 
-	<!--[if IE]>
-	<link rel="stylesheet" href="/static/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+
 
 	<link type="text/css" media="screen, projection" rel="stylesheet"
 	      href="/static/blueprint/plugins/fancy-type/screen.css"/>
@@ -23,7 +23,6 @@
 
 	<link rel="stylesheet" type="text/css" src="/static/tooltip.css" />
 	<style type="text/css">
-			/* <![CDATA[ */
 		.edit_error_class {
 			display: block;
 			color: red;
@@ -72,15 +71,10 @@
 		.line:hover {
 			border-color: red;
 		}
-
-			/* ]]> */
-
 		
 	</style>
 </head>
 <body>
-	<!---->
-	<!--body of default -->
 <div class="container">
 	<div class="column span-24 last" style="text-align: center">
 		<h1 class="alt">Pdf2Meta Segmentation Visualizer<img alt="" id="ajax-loader"
@@ -88,25 +82,37 @@
 		                                                src="/images/ajax-loader.gif"/></h1>
 	</div>
 
-	<!--
-		  <div class="column span-6 colborder sidebar">
-			<hr class="space" />
-			<lift:Menu.builder />
-			<div>
-			  <lift:Msgs showAll="true"/>
-			  <hr class="space" />
-			</div>
-		  </div>-->
 
 	<div class="column span-24 last">
-		<lift:bind name="content"/>
+		<div>
+	<p>
+		<lift:snippet type="uploader:upload" form="post" multipart="true">
+			<choose:post>
+				Should redirect
+			</choose:post>
+
+			<choose:get>
+				Select a PDF file to upload:
+				<ul:file_upload></ul:file_upload>
+				<br/>
+				<input type="submit" value="Upload File"/>
+			</choose:get>
+
+		</lift:snippet>
+	</p>
+
+				<lift:pdfexamples>
+				<p>Or view one of <examples:count/> existing examples:</p>
+					<examples:example>
+						<p><ex:url/></p>
+					</examples:example>
+				</lift:pdfexamples>
+		</div>
 	</div>
 
-	<!--   <div class="column span-23 last" style="text-align: center">
-			<h4 class="alt">
-			  <a href="http://www.liftweb.net"><i>Lift</i></a>
-				is Copyright 2007-2010 WorldWide Conferencing, LLC.  Distributed under an Apache 2.0 License.</h4>
-		  </div>-->
+
 </div>
 </body>
 </html>
+
+

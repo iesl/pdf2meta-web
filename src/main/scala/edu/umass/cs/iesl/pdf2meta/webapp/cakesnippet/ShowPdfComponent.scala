@@ -12,7 +12,9 @@ import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import collection.Seq
 import java.util.Date
 import edu.umass.cs.iesl.scalacommons.StreamWorkspace
-import org.scala_tools.subcut.inject.AutoInjectable
+//import org.scala_tools.subcut.inject.AutoInjectable
+import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+
 import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel._
 
 trait ShowPdfComponent
@@ -21,11 +23,12 @@ trait ShowPdfComponent
 
 	// with XmlExtractorComponent with
 	// CoarseSegmenterComponent =>
-	class ShowPdf extends (NodeSeq => NodeSeq) with AutoInjectable
+	class ShowPdf(implicit val bindingModule:BindingModule) extends (NodeSeq => NodeSeq) with Injectable
 		{
 		def apply(in: NodeSeq): NodeSeq =
 			{
-			val w = new StreamWorkspace(filenameBox.get.openTheBox, filestreamBox.get.openTheBox)
+
+      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
 			val length: Box[Text] = Full(Text(w.file.length.toString))
 
@@ -92,14 +95,18 @@ trait ShowPdfComponent
 
 						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
-						                     "image" -> image,
+						                     "image" -> image , //),
+                                    //text below the pages
 						                     "segments" -> bindSegment(all) _,
-						                     "features" -> bindFeatures(all) _,
-						                     "textboxes" -> bindTextBoxes(textBoxes) _,
-						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _,
-						                     "whitespaceboxes" -> bindWhitespaceBoxes(whitespaceBoxes) _,
-						                     "discardboxes" -> bindDiscardBoxes(discarded.map(_.node)) _,
-						                     "readingorder" -> bindReadingOrder(page, ReadingOrderPair.joinPairs(legit.map(_.node).toList)) _)
+                                    //I don't know
+//						                     "features" -> bindFeatures(all) _,
+						                     "textboxes" -> bindTextBoxes(textBoxes) _
+//						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _,
+//						                     "whitespaceboxes" -> bindWhitespaceBoxes(whitespaceBoxes) _,
+//						                     "discardboxes" -> bindDiscardBoxes(discarded.map(_.node)) _,
+//						                     "readingorder" -> bindReadingOrder(page, ReadingOrderPair.joinPairs(legit.map(_.node).toList))
+//                                        _
+                            )
 						                };
 					                }
 					boundPage
@@ -109,8 +116,9 @@ trait ShowPdfComponent
 				val result = bind("pdfinfo", template, "filename" -> Text(w.file.toString()), "successbox" -> bindSuccessBox(doc.info) _,
 				                  "errorbox" -> bindErrorBox(doc.errors) _, "pages" -> bindPage _)
 
-				logger.debug("Clearing temporary directory " + w.dir)
-				w.clean()
+// uncomment to clean the temp dir
+//				logger.debug("Clearing temporary directory " + w.dir)
+//				w.clean()
 
 				logger.debug("HTML Rendering done ")
 				val renderTime = new Date()

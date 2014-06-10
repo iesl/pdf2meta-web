@@ -4,7 +4,7 @@ import _root_.org.mortbay.jetty.Server
 import _root_.org.mortbay.jetty.webapp.WebAppContext
 import org.mortbay.jetty.nio._
 import java.net.URL
-import com.weiglewilczek.slf4s.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 // http://www.assembla.com/code/filesender2_proto/git/nodes/src/test/scala/RunWebApp.scala
 object Main extends App with Logging {

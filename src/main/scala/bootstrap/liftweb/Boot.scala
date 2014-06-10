@@ -3,16 +3,21 @@ package bootstrap.liftweb
 import net.liftweb._
 import common._
 import edu.umass.cs.iesl.pdf2meta.webapp.lib.ImageLogic
-import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.ShowPdfComponent
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.{ShowMetataggerComponent, ShowPdfComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import http._
 import edu.umass.cs.iesl.pdf2meta.cli.readingorder.RectangularReadingOrder
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenterComponent, AlignedPerceptronCoarseSegmenterComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
 import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, StandardScoringModel}
-import org.scala_tools.subcut.inject.NewBindingModule
+import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.{MetataggerBoxExtractor, MetataggerProcessor}
+
+//import org.scala_tools.subcut.inject.NewBindingModule
+import com.escalatesoft.subcut.inject.NewBindingModule
+//import NewBindingModule._
+//import module.NewBindingModule
 import com.davidsoergel.dsutils.PropertiesUtils
-import edu.umass.cs.iesl.pdf2meta.webapp.snippet.PdfExamples
+import edu.umass.cs.iesl.pdf2meta.webapp.snippet.{MetataggerExamples, PdfExamples}
 import edu.umass.cs.iesl.pdf2meta.cli.extract.pdfbox.{SpaceEstimator, PdfBoxExtractor}
 import edu.umass.cs.iesl.pdf2meta.cli.pagetransform._
 import edu.umass.cs.iesl.pdf2meta.cli.extract.PdfMinerExtractor
@@ -36,23 +41,16 @@ class Boot {
     })
 
     LiftRules.snippets.append({
+      case List("showmetatagger") => new WiredAppMetatagger.ShowMetatagger()
+    })
+
+    LiftRules.snippets.append({
       case List("pdfexamples") => new PdfExamples().render
     }) // ensure that the subcut config is passed
+    LiftRules.snippets.append({
+      case List("pdfexamplesmetatagger") => new MetataggerExamples().render
+    }) // ensure that the subcut config is passed
 
-
-    // Build SiteMap
-    /*   val entries = List(
-      Menu.i("Home") / "index", // the simple way to declare a menu
-
-      Menu.i("File Upload") / "file_upload",
-
-      Menu.i("Show examples") / "show_examples"
-                      )
-
-    // set the sitemap.  Note if you don't want access control for
-    // each page, just comment this line out.
-    LiftRules.setSiteMap(SiteMap(entries:_*))
-*/
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
@@ -71,6 +69,8 @@ class Boot {
 object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 
   val pdfExtractor = new PdfBoxExtractor
+
+  val metataggerExtractor = new MetataggerBoxExtractor
   //val pdfExtractor = new PdfMinerExtractor
 
   val docTransformer = new DocTransformerPipelineComponent {
@@ -103,6 +103,8 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 
   }
 
+
+
   val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent {
     lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent {
       lazy val scoringModel = StandardScoringModel
@@ -113,6 +115,35 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
   }
 
   val pipeline = new Pipeline;
+  val metataggerPipeline = new MetataggerPipeline;
+}
+
+
+//kzaporojets: configuration for being used with the output produced by metatagger
+object WiredAppMetatagger extends ShowMetataggerComponent with WebPipelineComponent {
+
+  val pdfExtractor = new PdfBoxExtractor
+  val metataggerExtractor = new MetataggerBoxExtractor
+
+  //val pdfExtractor = new PdfMinerExtractor
+
+  val docTransformer = new DocTransformerPipelineComponent {
+    val transformers = List(
+      new MetataggerProcessor
+    )
+
+  }
+  val coarseSegmenter = new AlignedPerceptronCoarseSegmenterComponent {
+    lazy val perceptronPhase = new PerceptronCoarseSegmenterComponent {
+      lazy val scoringModel = StandardScoringModel
+    }
+    lazy val segmentSmoother = new BestCoarseLabelModelAligner {
+      val coarseLabelModels = List(new StandardCoarseLabelModel) //, new LetterCoarseLabelModel)
+    }
+  }
+
+  val pipeline = new Pipeline;
+  val metataggerPipeline = new MetataggerPipeline;
 }
 
 object ProjectConfiguration extends NewBindingModule({
@@ -123,4 +154,7 @@ object ProjectConfiguration extends NewBindingModule({
     val props = PropertiesUtils.loadPropsFromFile(PropertiesUtils.findPropertiesFile("pdf2meta.properties", ".pdf2meta", "pdf2meta.properties"))
     bind[String] idBy 'convert toSingle props.getProperty("convert")
     bind[String] idBy 'examples toSingle props.getProperty("examples")
+    bind[String] idBy 'pstotext toSingle props.getProperty("pstotext")
+    bind[String] idBy 'pstotext_path toSingle props.getProperty("pstotext_path")
+    bind[String] idBy 'runcrf_path toSingle props.getProperty("runcrf_path")
 })
