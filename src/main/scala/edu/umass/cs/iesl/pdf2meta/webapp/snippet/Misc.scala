@@ -80,7 +80,7 @@ class Uploadertometatagger
     else
     {
       val box: Box[FileParamHolder] = theUpload.is
-      val v = box.openOrThrowException("exception") // box.openTheBox; kzaporojets, commented
+      val v = box.openOrThrowException("exception")
 
       if (v.mimeType != "application/pdf")
       {

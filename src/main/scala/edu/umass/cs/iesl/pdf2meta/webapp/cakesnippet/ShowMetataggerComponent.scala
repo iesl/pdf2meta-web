@@ -133,7 +133,7 @@ trait ShowMetataggerComponent
 				val result = bind("pdfinfo", template, "filename" -> Text(w.file.toString()), "successbox" -> bindSuccessBox(doc.info) _,
 				                  "errorbox" -> bindErrorBox(doc.errors) _, "pages" -> bindPage _)
 
-// kzaporojets: just comment
+// uncomment to clean the temporary directory
 //				logger.debug("Clearing temporary directory " + w.dir)
 //				w.clean()
 

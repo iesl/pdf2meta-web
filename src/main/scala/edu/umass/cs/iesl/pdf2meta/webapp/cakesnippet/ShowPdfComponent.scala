@@ -27,7 +27,6 @@ trait ShowPdfComponent
 		{
 		def apply(in: NodeSeq): NodeSeq =
 			{
-			// kzaporojets: comment because not compiling val w = new StreamWorkspace(filenameBox.get.openTheBox, filestreamBox.get.openTheBox)
 
       val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
@@ -117,7 +116,7 @@ trait ShowPdfComponent
 				val result = bind("pdfinfo", template, "filename" -> Text(w.file.toString()), "successbox" -> bindSuccessBox(doc.info) _,
 				                  "errorbox" -> bindErrorBox(doc.errors) _, "pages" -> bindPage _)
 
-// kzaporojets: just comment
+// uncomment to clean the temp dir
 //				logger.debug("Clearing temporary directory " + w.dir)
 //				w.clean()
 

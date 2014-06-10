@@ -70,7 +70,6 @@ object WiredApp extends ShowPdfComponent with WebPipelineComponent {
 
   val pdfExtractor = new PdfBoxExtractor
 
-  //kzaporojets TODO: get rid of this part of metataggerExtractor, it is not needed for WiredApp, it is only needed for WiredAppMetatagger
   val metataggerExtractor = new MetataggerBoxExtractor
   //val pdfExtractor = new PdfMinerExtractor
 
