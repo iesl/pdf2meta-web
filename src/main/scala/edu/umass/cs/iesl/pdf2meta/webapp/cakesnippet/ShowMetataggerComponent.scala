@@ -14,6 +14,7 @@ import java.util.Date
 import edu.umass.cs.iesl.scalacommons.StreamWorkspace
 import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.MetataggerBoxTextAtom
 import scala.util.matching.Regex
+import net.liftweb.http.S
 
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
@@ -70,6 +71,7 @@ trait ShowMetataggerComponent
 				val allWhitespaceBoxes: Seq[WhitespaceBox] = doc.whitespaceBoxes
 
 				val allTextBoxes: Seq[DocNode] = doc.children //textBoxChildren
+          println("the following value was saved in session: " + S.get("varv"))
 				def bindPage(pageTemplate: NodeSeq): NodeSeq =
 					{
 
