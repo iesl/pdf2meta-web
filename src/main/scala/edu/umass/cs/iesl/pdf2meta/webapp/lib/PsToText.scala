@@ -35,7 +35,7 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
     logger.info(output)
     logger.info(errors)
     logger.info("Finished running (" + exitCode + ") " + commandToRun)
-    output
+    output + errors
 
   }
 
@@ -53,13 +53,13 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 
   //check if the pdf file exists already and if it is the same using diff command
 
-//  println ("result of executing diff " + filePath + "/" + w.filename + " " + w.file + ": " +
-//              runCommand("diff " + filePath + "/" + w.filename + " " + w.file ))
-//
-//  println ("trim?: " + (runCommand("diff " + filePath + "/" + w.filename + " " + w.file).trim==""))
-//
-//  println ("result of executing ls " + filePath + "/" + w.filename + ": " +
-//    runCommand("ls " + filePath + "/" + w.filename ))
+  println ("result of executing diff " + filePath + "/" + w.filename + " " + w.file + ": " +
+              runCommand("diff " + filePath + "/" + w.filename + " " + w.file ))
+
+  println ("trim?: " + (runCommand("diff " + filePath + "/" + w.filename + " " + w.file).trim==""))
+
+  println ("result of executing ls " + filePath + "/" + w.filename + ": " +
+    runCommand("ls " + filePath + "/" + w.filename ))
 
   if(runCommand("ls " + filePath + "/" + w.filename ).contains("No such file") ||
                   runCommand("diff " + filePath + "/" + w.filename + " " + w.file).trim!="")

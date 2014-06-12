@@ -27,7 +27,7 @@ class MetataggerExamples(implicit val bindingModule:BindingModule) extends Injec
 
   def render(in: NodeSeq): NodeSeq = {
     // reread these on every render, to allow changing files while the server is runng
-    val examples = exampleDir.files.toSeq.filter(x => !x.name.startsWith("."))
+    val examples = exampleDir.files.toSeq.filter(x => !x.name.startsWith(".") && x.name.contains(".pdf"))
 
 //    println("examples: " + examples)
     def bindExamples(template: NodeSeq): NodeSeq = {
