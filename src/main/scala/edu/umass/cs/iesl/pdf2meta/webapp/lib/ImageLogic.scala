@@ -41,7 +41,7 @@ object ImageLogic
     }
   }
 
-case class PageImage(pageid: Int, file: File, mimeType: String)
+case class PageImage(pageid: Int, file: File, mimeType: String, imwidth:String, imheight:String)
   {
   val bytes: Array[Byte] = Resource.fromInputStream(file.inputStream()).byteArray
   val date = toInternetDate(file.lastModified)
@@ -49,7 +49,7 @@ case class PageImage(pageid: Int, file: File, mimeType: String)
 
   def imageUrl: NodeSeq =
     {
-      <img src={"/image/" + pageid}/>
+      <img src={"/image/" + pageid} width={"" + imwidth} height={"" + imheight}/>
     }
   }
 

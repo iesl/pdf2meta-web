@@ -39,6 +39,7 @@ class Uploader
    */
   def upload(xhtml: Group): NodeSeq =
     {
+
     if (S.get_? || theUpload.is.isEmpty)
       {
       bind("ul", chooseTemplate("choose", "get", xhtml), "file_upload" -> fileUpload(ul => theUpload(Full(ul))))

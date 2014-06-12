@@ -153,6 +153,7 @@ object ProjectConfiguration extends NewBindingModule({
 
     val props = PropertiesUtils.loadPropsFromFile(PropertiesUtils.findPropertiesFile("pdf2meta.properties", ".pdf2meta", "pdf2meta.properties"))
     bind[String] idBy 'convert toSingle props.getProperty("convert")
+    bind[String] idBy 'identify toSingle props.getProperty("identify")
     bind[String] idBy 'examples toSingle props.getProperty("examples")
     bind[String] idBy 'pstotext toSingle props.getProperty("pstotext")
     bind[String] idBy 'pstotext_path toSingle props.getProperty("pstotext_path")

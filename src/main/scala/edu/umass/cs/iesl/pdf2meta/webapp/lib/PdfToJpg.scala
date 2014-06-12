@@ -5,10 +5,18 @@ import com.typesafe.scalalogging.slf4j.Logging
 import scala.None
 import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
 import edu.umass.cs.iesl.scalacommons.Workspace
+import net.liftweb.http.RequestVar
+import net.liftweb.common.{Box, Empty}
+import net.liftweb._
+import scala.Some
+
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 
 import tools.nsc.io.File
+import http._
+
+import _root_.net.liftweb._
 
 /*
  * Created by IntelliJ IDEA.
@@ -18,69 +26,62 @@ import tools.nsc.io.File
  */
 class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends Logging with Injectable
 	{
-
+  object loginType extends RequestVar[Box[String]](Empty)
 	val outfilebase = w.dir + "/" + w.filename + ".jpg";
-	// w.dir + File.separator + w.file.segments.last + ".jpg"
-	// ** make sure ImageMagick stuff is in the path
-	// /usr/local/bin/convert
-	val convertPath = inject[String]('convert)
-	val command     = convertPath + " -verbose " + w.file + " " + outfilebase
 
-	val output =
-		{
-		logger.info("Running " + command)
-		val pb = Process(command)
-		val sb = StringBuilder.newBuilder
-		val sbe = StringBuilder.newBuilder
-		val pio = new ProcessIO(_ => (), stdout => scala.io.Source.fromInputStream(stdout).getLines().foreach(sb append _),
-		                        stderr => scala.io.Source.fromInputStream(stderr).getLines().foreach(sbe append _))
+  def runCommand(commandToRun:String) =
+  {
 
-    val p = pb.run(pio)
-		val exitCode = p.exitValue()
+      logger.info("Running " + commandToRun)
+      val pb = Process(commandToRun)
+      val sb = StringBuilder.newBuilder
+      val sbe = StringBuilder.newBuilder
+      val pio = new ProcessIO(_ => (), stdout => scala.io.Source.fromInputStream(stdout).getLines().foreach(sb append _),
+        stderr => scala.io.Source.fromInputStream(stderr).getLines().foreach(sbe append _))
 
-		val output = sb toString()
-		val errors = sbe toString()
-		logger.info(output)
-		logger.info(errors)
-		logger.info("Finished running (" + exitCode + ") " + command)
-		output
-		}
+      val p = pb.run(pio)
+      val exitCode = p.exitValue()
 
-	/*  lazy val outfiles: Map[Int, PageImage] =
-	  {
-	  output // just trigger the lazy evaluation
-	  val result = collection.mutable.Map[Int, PageImage]()
+      val output = sb toString()
+      val errors = sbe toString()
+      logger.info(output)
+      logger.info(errors)
+      logger.info("Finished running (" + exitCode + ") " + commandToRun)
+      output
 
-	  val pageidRE = "-(\\d+)\\.jpg".r
+  }
+  //gets the dimension of pdf first page, assuming that the rest of the pages have the same size
 
-	  for (f <- w.dir.files)
-		{
-		try
-		{
-		val r = pageidRE findFirstIn f.segments.last;
-		r match
-		{
-		  case None =>
-		  case Some(x) =>
-			{
-			logger.debug("Found " + x)
-			val pageidRE(pageidStr) = x
-			val pageid = pageidStr.toInt + 1
-			logger.debug("Storing image mapping: " + pageid + " -> " + f)
-			result += pageid -> new PageImage(pageid, f, "image/jpg")
-			}
-		}
-		}
-		catch
-		{
-		case e: MatchError =>
-		  {
-		  logger.error("Image name match failed: " + f.segments.last)
-		  } // ignore
-		}
-		}
-	  result.toMap
-	  }*/
+  val identifyPath = inject[String]('identify)
+  val commandIdentify = identifyPath + " " + w.file
+
+  val outputIdentify =runCommand(commandIdentify)
+
+  val reg = new scala.util.matching.Regex(""" ([\d]+)x([\d]+) """, "width", "height")
+
+  val mch = reg.findAllIn(outputIdentify.toString)
+
+  if(!mch.isEmpty)
+  {
+    val width = mch group "width"
+    val height = mch group "height"
+    S.set("width", width.toString)
+    S.set("height", height.toString)
+
+  }
+  else
+  {
+    //sets the default ones
+    S.set("width", "612")
+    S.set("height", "792")
+  }
+
+ 	val convertPath = inject[String]('convert)
+	val command = convertPath + " -density 400 -verbose " + w.file + " " + outfilebase
+
+
+  val output = runCommand(command)
+
 	val outfiles: Map[Int, PageImage] =
 		{
 		val pageidRE = "-(\\d+)\\.jpg".r
@@ -92,7 +93,8 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 			val r = pageidRE findFirstIn f.segments.last;
 			val pageidRE(pageidStr) = r.getOrElse()
 			val pageid = pageidStr.toInt + 1
-			Some(pageid -> new PageImage(pageid, f, "image/jpg"))
+			Some(pageid -> new PageImage(pageid, f, "image/jpg", S.get("width").openOrThrowException("err in width"),
+        S.get("height").openOrThrowException("err in height")))
 			}
 			catch
 			{
@@ -112,7 +114,8 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 		val f = File(w.file.toString() + ".jpg")
 		if (f.exists)
 			{
-			pageimages.set(Map((1, new PageImage(1, f, "image/jpg"))))
+			pageimages.set(Map((1, new PageImage(1, f, "image/jpg", S.get("width").openOrThrowException("err in width"),
+                S.get("height").openOrThrowException("err in height")))))
 			}
 		else
 			{
