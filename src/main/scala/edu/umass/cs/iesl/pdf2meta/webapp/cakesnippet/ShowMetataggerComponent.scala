@@ -15,6 +15,10 @@ import edu.umass.cs.iesl.scalacommons.StreamWorkspace
 import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.MetataggerBoxTextAtom
 import scala.util.matching.Regex
 import net.liftweb.http.S
+import java.awt.font._
+import org.specs2.internal.scalaz.std.int
+import java.awt.Font
+import java.awt.geom.AffineTransform
 
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
@@ -32,18 +36,18 @@ trait ShowMetataggerComponent
 		def apply(in: NodeSeq): NodeSeq =
 			{
 
-      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
-
-      val psToText: PsToText = new PsToText(w)
-      val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
-//      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.pdf"))
+//      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 //
-//      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
+//      val psToText: PsToText = new PsToText(w)
+//      val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
+      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.pdf"))
+
+      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
 
 
 
 
-        val length: Box[Text] = Full(Text(w.file.length.toString))
+      val length: Box[Text] = Full(Text(w.file.length.toString))
 
 			val filename: Box[Text] = Full(Text(w.filename))
 
@@ -400,19 +404,30 @@ trait ShowMetataggerComponent
           val truncatedText: String =
           {
             val t: String = x.node.text.trim
-            val s = t.substring(0, t.length.min(200))
+            val s = t.substring(0, t.length.min(300))
             s.length match
             {
-              case 200 => s + " ..."
+              case 300 => s + " ..."
               case 0   => "EMPTY"
               case _   => s
             }
           }
+          //calculates the width of truncated text
+
+          val affinetransform:AffineTransform = new AffineTransform();
+          val frc:FontRenderContext = new FontRenderContext(affinetransform,true,true);
+          val font:Font = new Font("Helvetica Neue", Font.PLAIN, 12);
+          val textwidth:Int = (font.getStringBounds(truncatedText, frc).getWidth()).toInt;
+          val textheight:Int = (font.getStringBounds(truncatedText, frc).getHeight()).toInt;
+
+          println ("textwidth for truncted text(" + truncatedText + "): " + textwidth)
+          println ("textheight for truncted text(" + truncatedText + "): " + textheight)
+
 //          if(truncatedText!="REFERENCES") {
             bind("sidelabel", segmentTemplate, "text" ->
               truncatedText,
               FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
-                "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
+                "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns, textwidth)), "style"))
 //          }
 //          else
 //          {
@@ -586,15 +601,15 @@ trait ShowMetataggerComponent
 			     rr.height + "px; ") ++ ns
 			}
 
-    private def addCoordsLabels(r: DocNode, ns: NodeSeq): NodeSeq =
+    private def addCoordsLabels(r: DocNode, ns: NodeSeq, textWidth: Int): NodeSeq =
     {
       val rr: RectangleOnPage = r.rectangle.get
       Text("position: absolute; top: " +
         (rr.page.rectangle.height - rr.top ) +
         //(rr.page.rectangle.height - rr.top) +
         "px; left: " + rr.page.rectangle.width +
-        "px; width: 300" +
-        "px; height: 23" + "px; ") ++ ns
+        "px; width: " + (textWidth + 10) +
+        "px; height: 20" + "px; ") ++ ns
     }
 
 		}
