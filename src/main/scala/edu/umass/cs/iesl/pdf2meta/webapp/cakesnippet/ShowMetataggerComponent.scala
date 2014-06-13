@@ -1,6 +1,6 @@
 package edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet
 
-import xml.{Text, NodeSeq}
+import scala.xml.{Node, Text, NodeSeq}
 import net.liftweb.util.BindHelpers._
 import net.liftweb.common.{Full, Box}
 import net.liftweb.http.js.JsCmds._
@@ -25,6 +25,7 @@ import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 
 import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel._
 import java.io.FileInputStream
+import scala.xml._
 
 //kzaporojets: modified for metatagger
 trait ShowMetataggerComponent
@@ -287,7 +288,7 @@ trait ShowMetataggerComponent
       {
         if(yCoord>headLabel.node.rectangle.get.top)
         {
-          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, headLabel.node.rectangle.get.top-25)
+          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, headLabel.node.rectangle.get.top-40)
           headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
             new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
               override val bottom: Float = headLabel.node.rectangle.get.top + 23
@@ -298,7 +299,7 @@ trait ShowMetataggerComponent
         }
         else
         {
-          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-25)
+          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-40)
           headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
             new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
               override val bottom: Float = yCoord + 23
@@ -404,15 +405,61 @@ trait ShowMetataggerComponent
           val truncatedText: String =
           {
             val t: String = x.node.text.trim
-            val s = t.substring(0, t.length.min(300))
+            val s = t.substring(0, t.length.min(1000))
             s.length match
             {
-              case 300 => s + " ..."
+              case 1000 => s + " ..."
               case 0   => "EMPTY"
               case _   => s
             }
           }
-          //calculates the width of truncated text
+//          def imageUrl: NodeSeq =
+//          {
+//              <img src={"/image/" + pageid} width={"" + imwidth} height={"" + imheight}/>
+//          }
+          //calculates the width of truncated text, first it splits it in spaces, and then builds lines of 60 characters each
+          def breakText(leftTokens:List[String], accumulatedTokens:List[String], widthSoFar:Int, largestWidth:Int, maxWidth:Int):NodeSeq=
+          {
+            if(leftTokens.size>0) {
+              val firstElement = leftTokens.head
+              if (widthSoFar + firstElement.length > maxWidth)
+              {
+                val ns:NodeSeq = new NodeSeq {
+                  override def theSeq: scala.Seq[Node] = List(new Node {override def child: scala.Seq[Node] = List()
+
+                    override def label: String = accumulatedTokens.map(x=> x.toString).mkString(" ")
+                  },
+                    new Node {override def child: scala.Seq[Node] = List()
+
+                      override def label: String = "<br>"
+                    }
+                  ) ++ breakText(leftTokens,List(),0,{if(widthSoFar > largestWidth){widthSoFar}else
+                  {largestWidth}}, maxWidth).theSeq
+                }
+                ns
+
+//                accumulatedTokens.map(x=> x.toString).mkString(" ") + breakText(leftTokens,List(),0,{if(widthSoFar > largestWidth){widthSoFar}else
+//                        {largestWidth}}, maxWidth)
+              }
+              else
+              {
+                breakText({if(leftTokens.size>1){leftTokens.tail}else{List()}},
+                        accumulatedTokens :+ firstElement, widthSoFar + firstElement.length + 1, largestWidth, maxWidth)
+              }
+            }
+            else
+            {
+//              accumulatedTokens.map(x=> x.toString).mkString(" ")
+                val ns:NodeSeq = new NodeSeq {
+                  override def theSeq: scala.Seq[Node] = List(new Node {override def child: scala.Seq[Node] = List()
+
+                    override def label: String = accumulatedTokens.map(x=> x.toString).mkString(" ")
+                  }
+                  )
+                }
+              ns
+            }
+          }
 
           val affinetransform:AffineTransform = new AffineTransform();
           val frc:FontRenderContext = new FontRenderContext(affinetransform,true,true);
@@ -420,12 +467,20 @@ trait ShowMetataggerComponent
           val textwidth:Int = (font.getStringBounds(truncatedText, frc).getWidth()).toInt;
           val textheight:Int = (font.getStringBounds(truncatedText, frc).getHeight()).toInt;
 
-          println ("textwidth for truncted text(" + truncatedText + "): " + textwidth)
-          println ("textheight for truncted text(" + truncatedText + "): " + textheight)
+//          println ("textwidth for truncted text(" + truncatedText + "): " + textwidth)
+//          println ("textheight for truncted text(" + truncatedText + "): " + textheight)
+
+          val testText:String = "<font>one text over <br></br> the other text jojo</font>"
+          val testTextList:List[String] = testText.split("<br>").toList
+
+
+          val brokenText:NodeSeq =  XML.loadString(testText) // testTextList.map(x=> {<font>{x}<br></br></font>}) //{<font>just test</font>} //breakText(truncatedText.split(" ").toList, List(), 0, 0, 60)
+
+//          println ("brokenText of " + truncatedText + ": " + brokenText)
 
 //          if(truncatedText!="REFERENCES") {
-            bind("sidelabel", segmentTemplate, "text" ->
-              truncatedText,
+          bind("sidelabel", segmentTemplate, "text" ->
+              /*truncatedText*/brokenText,
               FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
                 "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns, textwidth)), "style"))
 //          }
