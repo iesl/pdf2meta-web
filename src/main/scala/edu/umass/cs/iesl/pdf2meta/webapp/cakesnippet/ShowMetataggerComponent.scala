@@ -282,53 +282,125 @@ trait ShowMetataggerComponent
 //      //distributedL
 //    }
     private def distributeLabels(sortedSideLabels: Seq[ClassifiedRectangle], yCoord:Float):Seq[ClassifiedRectangle] = {
+
+      val affinetransform:AffineTransform = new AffineTransform();
+      val frc:FontRenderContext = new FontRenderContext(affinetransform,true,true);
+      val font:Font = new Font("Helvetica Neue", Font.PLAIN, 12);
+
+
       val headLabel:ClassifiedRectangle = sortedSideLabels.head
 
+
+      //the function that distributes in lines and calculates the max width
+      def breakText(leftTokens:List[String], accumulatedTokens:List[String], widthSoFar:Int, /* largestWidth:Int, */ maxWidth:Int):(String, Int)=
+      {
+        if(leftTokens.size>0) {
+          val firstElement = leftTokens.head
+          if (widthSoFar + font.getStringBounds(firstElement + " ", frc).getWidth().toInt > maxWidth)
+          {
+            val retVal = breakText(leftTokens,List(),0, /*{if(widthSoFar > largestWidth){widthSoFar}else
+                  {largestWidth}},*/ maxWidth)
+            (accumulatedTokens.map(x=> x.toString).mkString(" ") + " \n<br></br> " + retVal._1,
+              {if(widthSoFar > retVal._2){widthSoFar}else{retVal._2}})
+          }
+          else
+          {
+            breakText({if(leftTokens.size>1){leftTokens.tail}else{List()}},
+               accumulatedTokens :+ firstElement, widthSoFar + font.getStringBounds(firstElement + " ", frc).getWidth().toInt, maxWidth)
+          }
+        }
+        else
+        {
+          (accumulatedTokens.map(x=> x.toString).mkString(" "),widthSoFar)
+        }
+      }
+
+      //the function to copy the label, incorporating the newly generated text (with lines), and the vertical distances
+      def copyHeadLabel(headL:ClassifiedRectangle, topRel:Float):ClassifiedRectangle =
+      {
+        val ( tokenizedText:String,  maxWidth:Int) = breakText(headL.node.text.split(" ").toList, List(),
+                                                      0, /* largestWidth:Int, */ 400)
+
+
+
+        def boldenPart(tokenizedText:String):String = {
+          if(tokenizedText.indexOf(":") > -1)
+          {
+            "<strong>" + tokenizedText.substring(0,tokenizedText.indexOf(":")+1) + "</strong>" + tokenizedText.substring(tokenizedText.indexOf(":")+1,tokenizedText.length)
+          }
+          else
+          {
+            tokenizedText
+          }
+
+        }
+        headL.copy(node = new MetataggerBoxTextAtom(headL.node.id, boldenPart(tokenizedText) /*headL.node.text*/ /*.toUpperCase*/, "Font", 0.0f,
+          new RectangleOnPage {override val page: Page = headL.node.rectangle.get.page
+            override val bottom: Float = topRel + (20 * tokenizedText.split("\n").length + 5 )
+            override val top: Float = topRel
+            override val left: Float = headL.node.rectangle.get.left
+            override val right: Float = headL.node.rectangle.get.left + maxWidth //headL.node.rectangle.get.right
+          }, Array[Float](0f)))
+      }
       if(sortedSideLabels.size>1)
       {
         if(yCoord>headLabel.node.rectangle.get.top)
         {
-          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, headLabel.node.rectangle.get.top-40)
-          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
+          val copiedHeadLabel = copyHeadLabel(headLabel,headLabel.node.rectangle.get.top)
+          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, headLabel.node.rectangle.get.top-(copiedHeadLabel.node.rectangle.get.bottom -
+                                                                                                                    copiedHeadLabel.node.rectangle.get.top))
+          copiedHeadLabel+:distributedL
+
+          /*headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
             new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
               override val bottom: Float = headLabel.node.rectangle.get.top + 23
               override val top: Float = headLabel.node.rectangle.get.top
               override val left: Float = headLabel.node.rectangle.get.left
               override val right: Float = headLabel.node.rectangle.get.right
-            }, Array[Float](0f)))+:distributedL
+            }, Array[Float](0f)))*/
         }
         else
         {
-          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-40)
-          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
-            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-              override val bottom: Float = yCoord + 23
-              override val top: Float = yCoord
-              override val left: Float = headLabel.node.rectangle.get.left
-              override val right: Float = headLabel.node.rectangle.get.right
-            }, Array[Float](0f)))+:distributedL
+          val copiedHeadLabel = copyHeadLabel(headLabel,yCoord)
+          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-(copiedHeadLabel.node.rectangle.get.bottom -
+            copiedHeadLabel.node.rectangle.get.top))
+          copiedHeadLabel+:distributedL
+//
+//          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-40)
+//          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
+//            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+//              override val bottom: Float = yCoord + 23
+//              override val top: Float = yCoord
+//              override val left: Float = headLabel.node.rectangle.get.left
+//              override val right: Float = headLabel.node.rectangle.get.right
+//            }, Array[Float](0f)))+:distributedL
         }
       }
       else
       {
         if(yCoord>headLabel.node.rectangle.get.top) {
-          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
-            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-              override val bottom: Float = headLabel.node.rectangle.get.top + 23
-              override val top: Float = headLabel.node.rectangle.get.top
-              override val left: Float = headLabel.node.rectangle.get.left
-              override val right: Float = headLabel.node.rectangle.get.right
-            }, Array[Float](0f))))
+          val copiedHeadLabel = copyHeadLabel(headLabel,headLabel.node.rectangle.get.top)
+          List(copiedHeadLabel)
+//          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
+//            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+//              override val bottom: Float = headLabel.node.rectangle.get.top + 23
+//              override val top: Float = headLabel.node.rectangle.get.top
+//              override val left: Float = headLabel.node.rectangle.get.left
+//              override val right: Float = headLabel.node.rectangle.get.right
+//            }, Array[Float](0f))))
         }
         else
         {
-          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
-            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-              override val bottom: Float = yCoord + 23
-              override val top: Float = yCoord
-              override val left: Float = headLabel.node.rectangle.get.left
-              override val right: Float = headLabel.node.rectangle.get.right
-            }, Array[Float](0f))))
+          val copiedHeadLabel = copyHeadLabel(headLabel,yCoord)
+          List(copiedHeadLabel)
+
+//          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
+//            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
+//              override val bottom: Float = yCoord + 23
+//              override val top: Float = yCoord
+//              override val left: Float = headLabel.node.rectangle.get.left
+//              override val right: Float = headLabel.node.rectangle.get.right
+//            }, Array[Float](0f))))
         }
 
       }
@@ -413,65 +485,17 @@ trait ShowMetataggerComponent
               case _   => s
             }
           }
-//          def imageUrl: NodeSeq =
-//          {
-//              <img src={"/image/" + pageid} width={"" + imwidth} height={"" + imheight}/>
-//          }
-          //calculates the width of truncated text, first it splits it in spaces, and then builds lines of 60 characters each
-          def breakText(leftTokens:List[String], accumulatedTokens:List[String], widthSoFar:Int, largestWidth:Int, maxWidth:Int):NodeSeq=
-          {
-            if(leftTokens.size>0) {
-              val firstElement = leftTokens.head
-              if (widthSoFar + firstElement.length > maxWidth)
-              {
-                val ns:NodeSeq = new NodeSeq {
-                  override def theSeq: scala.Seq[Node] = List(new Node {override def child: scala.Seq[Node] = List()
 
-                    override def label: String = accumulatedTokens.map(x=> x.toString).mkString(" ")
-                  },
-                    new Node {override def child: scala.Seq[Node] = List()
-
-                      override def label: String = "<br>"
-                    }
-                  ) ++ breakText(leftTokens,List(),0,{if(widthSoFar > largestWidth){widthSoFar}else
-                  {largestWidth}}, maxWidth).theSeq
-                }
-                ns
-
-//                accumulatedTokens.map(x=> x.toString).mkString(" ") + breakText(leftTokens,List(),0,{if(widthSoFar > largestWidth){widthSoFar}else
-//                        {largestWidth}}, maxWidth)
-              }
-              else
-              {
-                breakText({if(leftTokens.size>1){leftTokens.tail}else{List()}},
-                        accumulatedTokens :+ firstElement, widthSoFar + firstElement.length + 1, largestWidth, maxWidth)
-              }
-            }
-            else
-            {
-//              accumulatedTokens.map(x=> x.toString).mkString(" ")
-                val ns:NodeSeq = new NodeSeq {
-                  override def theSeq: scala.Seq[Node] = List(new Node {override def child: scala.Seq[Node] = List()
-
-                    override def label: String = accumulatedTokens.map(x=> x.toString).mkString(" ")
-                  }
-                  )
-                }
-              ns
-            }
-          }
-
-          val affinetransform:AffineTransform = new AffineTransform();
-          val frc:FontRenderContext = new FontRenderContext(affinetransform,true,true);
-          val font:Font = new Font("Helvetica Neue", Font.PLAIN, 12);
-          val textwidth:Int = (font.getStringBounds(truncatedText, frc).getWidth()).toInt;
-          val textheight:Int = (font.getStringBounds(truncatedText, frc).getHeight()).toInt;
+//          val affinetransform:AffineTransform = new AffineTransform();
+//          val frc:FontRenderContext = new FontRenderContext(affinetransform,true,true);
+//          val font:Font = new Font("Helvetica Neue", Font.PLAIN, 12);
+//          val textwidth:Int = (font.getStringBounds(truncatedText, frc).getWidth()).toInt;
+//          val textheight:Int = (font.getStringBounds(truncatedText, frc).getHeight()).toInt;
 
 //          println ("textwidth for truncted text(" + truncatedText + "): " + textwidth)
 //          println ("textheight for truncted text(" + truncatedText + "): " + textheight)
 
-          val testText:String = "<font>one text over <br></br> the other text jojo</font>"
-          val testTextList:List[String] = testText.split("<br>").toList
+          val testText:String = "<font>" + truncatedText + "</font>"
 
 
           val brokenText:NodeSeq =  XML.loadString(testText) // testTextList.map(x=> {<font>{x}<br></br></font>}) //{<font>just test</font>} //breakText(truncatedText.split(" ").toList, List(), 0, 0, 60)
@@ -482,7 +506,7 @@ trait ShowMetataggerComponent
           bind("sidelabel", segmentTemplate, "text" ->
               /*truncatedText*/brokenText,
               FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
-                "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns, textwidth)), "style"))
+                "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
 //          }
 //          else
 //          {
@@ -656,15 +680,15 @@ trait ShowMetataggerComponent
 			     rr.height + "px; ") ++ ns
 			}
 
-    private def addCoordsLabels(r: DocNode, ns: NodeSeq, textWidth: Int): NodeSeq =
+    private def addCoordsLabels(r: DocNode, ns: NodeSeq): NodeSeq =
     {
       val rr: RectangleOnPage = r.rectangle.get
       Text("position: absolute; top: " +
         (rr.page.rectangle.height - rr.top ) +
         //(rr.page.rectangle.height - rr.top) +
         "px; left: " + rr.page.rectangle.width +
-        "px; width: " + (textWidth + 10) +
-        "px; height: 20" + "px; ") ++ ns
+        "px; width: " + ((r.rectangle.get.right - r.rectangle.get.left).toInt + 10) +
+        "px; height: " + (r.rectangle.get.bottom - r.rectangle.get.top) +  "px; ") ++ ns
     }
 
 		}
