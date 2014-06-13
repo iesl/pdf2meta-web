@@ -30,7 +30,16 @@ import scala.xml._
 //kzaporojets: modified for metatagger
 trait ShowMetataggerComponent
 	{
+
+
 	this: WebPipelineComponent =>
+
+
+  val allowDuplicates:Seq[String] = List("CONTENT -> HEADERS -> AUTHORS -> AUTHOR -> AUTHOR-FIRST",
+                                          "CONTENT -> HEADERS -> AUTHORS -> AUTHOR -> AUTHOR-LAST",
+                                          "CONTENT -> BIBLIO -> REFERENCE -> AUTHORS -> AUTHOR -> AUTHOR-FIRST",
+                                          "CONTENT -> BIBLIO -> REFERENCE -> AUTHORS -> AUTHOR -> AUTHOR-LAST",
+                                          "CONTENT -> BIBLIO -> REFERENCE -> AUTHORS -> AUTHOR -> AUTHOR-MIDDLE")
 
 	class ShowMetatagger(implicit val bindingModule:BindingModule) extends (NodeSeq => NodeSeq) with Injectable
 		{
@@ -189,7 +198,7 @@ trait ShowMetataggerComponent
       {
         val recValue = getDistinctLabels(sidelabels.tail,labelsToIgnore)
         val headL= sidelabels.head
-        if(recValue.exists(x => x.node.id == headL.node.id))
+        if(recValue.exists(x => x.node.id == headL.node.id) && !(allowDuplicates.exists(x=> headL.node.id.toUpperCase().contains(x))))
         {
           val value = recValue.find(x => x.node.id == headL.node.id)
 
@@ -229,36 +238,11 @@ trait ShowMetataggerComponent
     private def organizeLabels(sidelabels: Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
       def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (if (classRectangle1.node.rectangle.get.top.toInt !=classRectangle2.node.rectangle.get.top.toInt){classRectangle1.node.rectangle.get.top > classRectangle2.node.rectangle.get.top}
                                                                                             else {classRectangle1.node.text.length < classRectangle2.node.text.length})
-//      def compfn1 (classRectangle1:ClassifiedRectangle, classRectangle2:ClassifiedRectangle) = (maxValue(sidelabels.filter(sl => sl.node.text == classRectangle1.node.text)) > maxValue(sidelabels.filter(sl => sl.node.text == classRectangle2.node.text)))
+
       val sortedLabels:Seq[ClassifiedRectangle] = sidelabels.sortWith(compfn1)
-      //sortedLabels
-      //50 because of margin
-//      distributeLabels(sortedLabels, sortedLabels(0).node.rectangle.get.page.rectangle.height - 150)
       distributeLabels(sortedLabels, sortedLabels(0).node.rectangle.get.page.rectangle.height)
     }
 
-//    private def distributeLabels(sortedSideLabels: Seq[ClassifiedRectangle], yCoord:Float):Seq[ClassifiedRectangle] = {
-//      val headLabel:ClassifiedRectangle = sortedSideLabels.head
-//
-//      val repositionedHeadLabel:ClassifiedRectangle = headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text.toUpperCase, "Font", 0.0f,
-//        new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-//          override val bottom: Float = yCoord + 23
-//          override val top: Float = yCoord
-//          override val left: Float = headLabel.node.rectangle.get.left
-//          override val right: Float = headLabel.node.rectangle.get.right
-//        }, Array[Float](0f)))
-//
-//      if(sortedSideLabels.size>1)
-//      {
-//        val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-25)
-//        repositionedHeadLabel+:distributedL
-//      }
-//      else
-//      {
-//        List(repositionedHeadLabel)
-//      }
-//      //distributedL
-//    }
     private def distributeLabels(sortedSideLabels: Seq[ClassifiedRectangle], yCoord:Float):Seq[ClassifiedRectangle] = {
 
       val affinetransform:AffineTransform = new AffineTransform();
