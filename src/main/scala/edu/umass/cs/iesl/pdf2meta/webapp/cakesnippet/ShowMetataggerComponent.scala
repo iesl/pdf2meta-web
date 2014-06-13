@@ -108,10 +108,6 @@ trait ShowMetataggerComponent
 							                                                    case Some(x) => x.page == page;
 							                                                    case None    => false;
 						                                                    })
-/*
-    private def bindExternalLabels(sidelabels: Seq[ClassifiedRectangle], groupSideLabels:Seq[ClassifiedRectangle],
-                                  divId:String, referencePattern:Regex, extSegmentTemplate: NodeSeq)(segmentTemplate: NodeSeq): NodeSeq =
-* */
                           val reg = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
                           val reg2 = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*reference$""", "coord1", "coord2", "coord3", "coord4", "pagenum")
  						                bind("page", pageTemplate,
@@ -163,8 +159,7 @@ trait ShowMetataggerComponent
 			{
 			case x: ClassifiedRectangle =>
 				{
-				//val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
-				//val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
+
 				val truncatedText: String =
 					{
 					val t: String = x.node.text.trim
@@ -187,28 +182,11 @@ trait ShowMetataggerComponent
 
 
 
-//    private def organizeLabels(sidelabels: Seq[ClassifiedRectangle], newSideLabels:Seq[ClassifiedRectangle]):Seq[ClassifiedRectangle] = {
-//      val slabel: ClassifiedRectangle = sidelabels.head
-//
-//      val other = sidelabels.find(x=> ((slabel.node.rectangle.get.top > x.node.rectangle.get.bottom && slabel.node.rectangle.get.top < x.node.rectangle.get.top) ||
-//        (slabel.node.rectangle.get.bottom > x.node.rectangle.get.bottom && slabel.node.rectangle.get.bottom < x.node.rectangle.get.top)))
-//
-//      //slabel.copy(node = slabel.node.copy() )
-//
-//      if(newSideLabels.exists(x => ((slabel.node.rectangle.get.top > x.node.rectangle.get.bottom && slabel.node.rectangle.get.top < x.node.rectangle.get.top) ||
-//                                    (slabel.node.rectangle.get.bottom > x.node.rectangle.get.bottom && slabel.node.rectangle.get.bottom < x.node.rectangle.get.top)) ))
-//      {
-//        slabel+:sidelabels.tail
-//        slabel.copy()
-//      }
-//
-//
-//    }
+
 
     private def getDistinctLabels(sidelabels:Seq[ClassifiedRectangle], labelsToIgnore:Seq[String]):Seq[ClassifiedRectangle] = {
       if(sidelabels.size>1)
       {
-        //sidelabels.tail.exists(x => x.node.id == sidelabels.head.node.id)
         val recValue = getDistinctLabels(sidelabels.tail,labelsToIgnore)
         val headL= sidelabels.head
         if(recValue.exists(x => x.node.id == headL.node.id))
@@ -350,14 +328,6 @@ trait ShowMetataggerComponent
           val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, headLabel.node.rectangle.get.top-(copiedHeadLabel.node.rectangle.get.bottom -
                                                                                                                     copiedHeadLabel.node.rectangle.get.top))
           copiedHeadLabel+:distributedL
-
-          /*headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
-            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-              override val bottom: Float = headLabel.node.rectangle.get.top + 23
-              override val top: Float = headLabel.node.rectangle.get.top
-              override val left: Float = headLabel.node.rectangle.get.left
-              override val right: Float = headLabel.node.rectangle.get.right
-            }, Array[Float](0f)))*/
         }
         else
         {
@@ -365,15 +335,6 @@ trait ShowMetataggerComponent
           val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-(copiedHeadLabel.node.rectangle.get.bottom -
             copiedHeadLabel.node.rectangle.get.top))
           copiedHeadLabel+:distributedL
-//
-//          val distributedL:Seq[ClassifiedRectangle] = distributeLabels(sortedSideLabels.tail, yCoord-40)
-//          headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
-//            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-//              override val bottom: Float = yCoord + 23
-//              override val top: Float = yCoord
-//              override val left: Float = headLabel.node.rectangle.get.left
-//              override val right: Float = headLabel.node.rectangle.get.right
-//            }, Array[Float](0f)))+:distributedL
         }
       }
       else
@@ -381,26 +342,12 @@ trait ShowMetataggerComponent
         if(yCoord>headLabel.node.rectangle.get.top) {
           val copiedHeadLabel = copyHeadLabel(headLabel,headLabel.node.rectangle.get.top)
           List(copiedHeadLabel)
-//          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
-//            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-//              override val bottom: Float = headLabel.node.rectangle.get.top + 23
-//              override val top: Float = headLabel.node.rectangle.get.top
-//              override val left: Float = headLabel.node.rectangle.get.left
-//              override val right: Float = headLabel.node.rectangle.get.right
-//            }, Array[Float](0f))))
         }
         else
         {
           val copiedHeadLabel = copyHeadLabel(headLabel,yCoord)
           List(copiedHeadLabel)
 
-//          List(headLabel.copy(node = new MetataggerBoxTextAtom(headLabel.node.id, headLabel.node.text /*.toUpperCase*/, "Font", 0.0f,
-//            new RectangleOnPage {override val page: Page = headLabel.node.rectangle.get.page
-//              override val bottom: Float = yCoord + 23
-//              override val top: Float = yCoord
-//              override val left: Float = headLabel.node.rectangle.get.left
-//              override val right: Float = headLabel.node.rectangle.get.right
-//            }, Array[Float](0f))))
         }
 
       }
@@ -412,8 +359,6 @@ trait ShowMetataggerComponent
 
         val headSidelabels = sidelabels.head
         val id:String = headSidelabels.node.id
-  //      val referencePattern = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)""", "coord1", "coord2", "coord3", "coord4", "pagenum")
-       // def getDivId(divId:String, classRect:ClassifiedRectangle) = {if(divId==""){classRect.node.id}else{divId}}
         val m4 = referencePattern.findAllIn(id)
         if(!m4.isEmpty)
         {
@@ -486,32 +431,16 @@ trait ShowMetataggerComponent
             }
           }
 
-//          val affinetransform:AffineTransform = new AffineTransform();
-//          val frc:FontRenderContext = new FontRenderContext(affinetransform,true,true);
-//          val font:Font = new Font("Helvetica Neue", Font.PLAIN, 12);
-//          val textwidth:Int = (font.getStringBounds(truncatedText, frc).getWidth()).toInt;
-//          val textheight:Int = (font.getStringBounds(truncatedText, frc).getHeight()).toInt;
-
-//          println ("textwidth for truncted text(" + truncatedText + "): " + textwidth)
-//          println ("textheight for truncted text(" + truncatedText + "): " + textheight)
 
           val testText:String = "<font>" + truncatedText + "</font>"
 
 
           val brokenText:NodeSeq =  XML.loadString(testText) // testTextList.map(x=> {<font>{x}<br></br></font>}) //{<font>just test</font>} //breakText(truncatedText.split(" ").toList, List(), 0, 0, 60)
 
-//          println ("brokenText of " + truncatedText + ": " + brokenText)
-
-//          if(truncatedText!="REFERENCES") {
           bind("sidelabel", segmentTemplate, "text" ->
               /*truncatedText*/brokenText,
               FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
                 "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
-//          }
-//          else
-//          {
-//            NodeSeq.Empty
-//          }
         }
         case _                      => NodeSeq.Empty
       }
@@ -523,8 +452,6 @@ trait ShowMetataggerComponent
 			{
 			case ClassifiedRectangle(textbox: DocNode, features, scores, Some(x)) =>
 				{
-				//val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
-				// val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
 				def bindPair(ss: Iterator[(String, Double)])(sTemplate: NodeSeq): NodeSeq =
 					{
 					(ss.flatMap
@@ -532,14 +459,11 @@ trait ShowMetataggerComponent
 					 pair => bind("pair", sTemplate, "a" -> pair._1, "b" -> ("%3.2f" format pair._2))
 					 }).toSeq
 					}
-				//.filter(_._2>0)
 				bind("features", segmentTemplate, "features" -> bindPair(x.featureWeights.asSeq.map(f => (f._1.toString, f._2)).iterator) _,
 				     "scores" -> bindPair(x.labelWeights.asSeq.iterator) _, FuncAttrBindParam("id", (ns: NodeSeq) => Text(textbox.id), "id"))
 				}
 			case ClassifiedRectangle(textbox: DocNode, features, scores, None)    =>
 				{
-				//val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
-				// val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
 				def bindPair(ss: Iterator[(String, Double)])(sTemplate: NodeSeq): NodeSeq =
 					{
 					(ss.flatMap
