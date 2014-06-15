@@ -199,18 +199,24 @@ trait ShowMetataggerComponent
       {
         val recValue = getDistinctLabels(sidelabels.tail,labelsToIgnore)
         val headL= sidelabels.head
-        if(recValue.exists(x => x.node.id == headL.node.id) && !(allowDuplicates.exists(x=> headL.node.id.toUpperCase().contains(x))))
+        if(recValue.exists(x => x.node.id == headL.node.id)/* && !(allowDuplicates.exists(x=> headL.node.id.toUpperCase().contains(x)))*/)
         {
           val value = recValue.find(x => x.node.id == headL.node.id)
 
           if(value.get.node.rectangle.get.top < headL.node.rectangle.get.top )
           {
             val (left, right) = recValue.span(_.node.id != headL.node.id)
-            (headL +: left) ++ right.drop(1)
+
+
+            val headLWChildren = headL.copy(children = headL.children ++ value.get.children )
+            (headLWChildren +: left) ++ right.drop(1)
           }
           else
           {
-            recValue
+            val (left, right) = recValue.span(_.node.id != headL.node.id)
+            val headLWChildren = value.get.copy(children = headL.children ++ value.get.children )
+            (left :+ headLWChildren) ++ right.drop(1)
+//            recValue
           }
         }
         else if (labelsToIgnore.exists(x=> x==headL.node.text))
@@ -259,7 +265,7 @@ trait ShowMetataggerComponent
       {
         if(leftTokens.size>0) {
           val firstElement = leftTokens.head
-          if (widthSoFar + font.getStringBounds(firstElement + " ", frc).getWidth().toInt > maxWidth)
+          if (widthSoFar + font.getStringBounds({if((firstElement + " ").trim==""){""}else{firstElement + " "}}, frc).getWidth().toInt > maxWidth)
           {
             val retVal = breakText(leftTokens,List(),0, /*{if(widthSoFar > largestWidth){widthSoFar}else
                   {largestWidth}},*/ maxWidth)
@@ -269,7 +275,7 @@ trait ShowMetataggerComponent
           else
           {
             breakText({if(leftTokens.size>1){leftTokens.tail}else{List()}},
-               accumulatedTokens :+ firstElement, widthSoFar + font.getStringBounds(firstElement + " ", frc).getWidth().toInt, maxWidth)
+               accumulatedTokens :+ firstElement, widthSoFar + font.getStringBounds({if((firstElement + " ").trim==""){""}else{firstElement + " "}}, frc).getWidth().toInt, maxWidth)
           }
         }
         else
@@ -278,6 +284,31 @@ trait ShowMetataggerComponent
         }
       }
 
+      def addTextChildren(rect:Seq[ClassifiedRectangle], number:Int, widthSoFar:Int):(String, Int) =
+      {
+        if(rect.size>0)
+        {
+          val currentRect = rect.head
+          val rectRes:String = "&#160;&#160;&#160;&#160;&#160;<strong>AUTHOR " + number + "</strong> " + currentRect.node.text.replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
+                      .replaceAll("MN:","<strong>MN:</strong>")
+          val textWidth:Int = font.getStringBounds(rectRes.replaceAll("<strong>","").replaceAll("</strong>","").replaceAll("&#160;", " "), frc).getWidth().toInt
+          if(rect.size>1)
+          {
+            val tchil = addTextChildren(rect.tail,number+1,{if(textWidth>widthSoFar){textWidth}else{widthSoFar}})
+            ("\n<br></br>" + rectRes + tchil._1, {if(textWidth>widthSoFar && textWidth>tchil._2){textWidth}else if(widthSoFar>tchil._2){widthSoFar} else{tchil._2}})
+          }
+          else
+          {
+            ("\n<br></br>" + rectRes, {if(textWidth>widthSoFar){textWidth}else{widthSoFar}})
+          }
+        }
+        else
+        {
+          ("",widthSoFar)
+        }
+
+
+      }
       //the function to copy the label, incorporating the newly generated text (with lines), and the vertical distances
       def copyHeadLabel(headL:ClassifiedRectangle, topRel:Float):ClassifiedRectangle =
       {
@@ -285,6 +316,10 @@ trait ShowMetataggerComponent
                                                       0, /* largestWidth:Int, */ 400)
 
 
+
+        val (childrenText:String, maxChildrenWidth:Int) = addTextChildren(headL.children,1,maxWidth)
+        //the children text is added
+        val finalTextWithChildren = tokenizedText + childrenText
 
         def boldenPart(tokenizedText:String):String = {
           if(tokenizedText.indexOf(":") > -1)
@@ -297,12 +332,12 @@ trait ShowMetataggerComponent
           }
 
         }
-        headL.copy(node = new MetataggerBoxTextAtom(headL.node.id, boldenPart(tokenizedText) /*headL.node.text*/ /*.toUpperCase*/, "Font", 0.0f,
+        headL.copy(node = new MetataggerBoxTextAtom(headL.node.id, finalTextWithChildren /*boldenPart(tokenizedText)*/ /*headL.node.text*/ /*.toUpperCase*/, "Font", 0.0f,
           new RectangleOnPage {override val page: Page = headL.node.rectangle.get.page
-            override val bottom: Float = topRel + (20 * tokenizedText.split("\n").length + 5 )
+            override val bottom: Float = topRel + (20 * finalTextWithChildren.split("\n").length + 5 )
             override val top: Float = topRel
             override val left: Float = headL.node.rectangle.get.left
-            override val right: Float = headL.node.rectangle.get.left + maxWidth //headL.node.rectangle.get.right
+            override val right: Float = headL.node.rectangle.get.left + maxChildrenWidth // maxWidth //headL.node.rectangle.get.right
           }, Array[Float](0f)))
       }
       if(sortedSideLabels.size>1)
@@ -623,7 +658,7 @@ trait ShowMetataggerComponent
         (rr.page.rectangle.height - rr.top ) +
         //(rr.page.rectangle.height - rr.top) +
         "px; left: " + rr.page.rectangle.width +
-        "px; width: " + ((r.rectangle.get.right - r.rectangle.get.left).toInt + 10) +
+        "px; width: " + ((r.rectangle.get.right - r.rectangle.get.left).toInt + 12) +
         "px; height: " + (r.rectangle.get.bottom - r.rectangle.get.top) +  "px; ") ++ ns
     }
 
