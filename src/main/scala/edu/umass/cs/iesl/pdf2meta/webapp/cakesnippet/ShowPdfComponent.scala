@@ -174,7 +174,7 @@ trait ShowPdfComponent
 			{
 			segments.flatMap
 			{
-			case ClassifiedRectangle(textbox: DocNode, features, scores, Some(x)) =>
+			case ClassifiedRectangle(textbox: DocNode, features, scores, Some(x), List()) =>
 				{
 				//val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
 				// val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")
@@ -189,7 +189,7 @@ trait ShowPdfComponent
 				bind("features", segmentTemplate, "features" -> bindPair(x.featureWeights.asSeq.map(f => (f._1.toString, f._2)).iterator) _,
 				     "scores" -> bindPair(x.labelWeights.asSeq.iterator) _, FuncAttrBindParam("id", (ns: NodeSeq) => Text(textbox.id), "id"))
 				}
-			case ClassifiedRectangle(textbox: DocNode, features, scores, None)    =>
+			case ClassifiedRectangle(textbox: DocNode, features, scores, None, List())    =>
 				{
 				//val details = "\"" + features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>" + "\"")
 				// val details = features.mkString("<br/>") + "<hr/>" + scores.mkString("<br/>")

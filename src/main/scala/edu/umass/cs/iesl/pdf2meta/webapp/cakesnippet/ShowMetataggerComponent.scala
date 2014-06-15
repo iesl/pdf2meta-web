@@ -74,22 +74,22 @@ trait ShowMetataggerComponent
 				logger.debug("PDF image generation done ")
 				val extractTime = new Date()
 				logger.debug("PDF image generation took " + ((extractTime.getTime - startTime.getTime)) + " milliseconds")
-        val (doc: DocNode, classifiedRectangles: ClassifiedRectangles) = metataggerPipeline.apply(w_xml)
+        val (dokiss: DocNode, classifiedRectangles: ClassifiedRectangles) = metataggerPipeline.apply(w_xml)
 
 
 				logger.debug("Conversion pipeline done ")
 				val pipelineTime = new Date()
 				logger.debug("Conversion pipeline took " + ((pipelineTime.getTime - extractTime.getTime)) + " milliseconds")
 //
-				val allDelimitingBoxes: Seq[DelimitingBox] = doc.delimitingBoxes
-				val allWhitespaceBoxes: Seq[WhitespaceBox] = doc.whitespaceBoxes
+//				val allDelimitingBoxes: Seq[DelimitingBox] = doc.delimitingBoxes
+//				val allWhitespaceBoxes: Seq[WhitespaceBox] = doc.whitespaceBoxes
 
-				val allTextBoxes: Seq[DocNode] = doc.children //textBoxChildren
+//				val allTextBoxes: Seq[DocNode] = doc.children //textBoxChildren
           println("the following value was saved in session: " + S.get("varv"))
 				def bindPage(pageTemplate: NodeSeq): NodeSeq =
 					{
 
-					val leafRects: Seq[RectangleOnPage] = doc.leaves.map(_.rectangle).flatten
+					val leafRects: Seq[RectangleOnPage] = classifiedRectangles.raw.map(_.node.rectangle.get) //doc.leaves.map(_.rectangle).flatten
 					val pages = leafRects.map(_.page).distinct.sortBy(_.pagenum)
 
 					val boundPage = pages.flatMap
@@ -102,21 +102,21 @@ trait ShowMetataggerComponent
 
 						                val image = pageimages.get(page.pagenum).imageUrl
 
-						                val delimitingBoxes = allDelimitingBoxes.filter(_.rectangle match
-						                                                                {
-							                                                                case Some(x) => x.page == page;
-							                                                                case None    => false;
-						                                                                })
-						                val whitespaceBoxes = allWhitespaceBoxes.filter(_.rectangle match
-						                                                                {
-							                                                                case Some(x) => x.page == page;
-							                                                                case None    => false;
-						                                                                })
-						                val textBoxes = allTextBoxes.filter(_.rectangle match
-						                                                    {
-							                                                    case Some(x) => x.page == page;
-							                                                    case None    => false;
-						                                                    })
+//						                val delimitingBoxes = allDelimitingBoxes.filter(_.rectangle match
+//						                                                                {
+//							                                                                case Some(x) => x.page == page;
+//							                                                                case None    => false;
+//						                                                                })
+//						                val whitespaceBoxes = allWhitespaceBoxes.filter(_.rectangle match
+//						                                                                {
+//							                                                                case Some(x) => x.page == page;
+//							                                                                case None    => false;
+//						                                                                })
+//						                val textBoxes = allTextBoxes.filter(_.rectangle match
+//						                                                    {
+//							                                                    case Some(x) => x.page == page;
+//							                                                    case None    => false;
+//						                                                    })
                           val reg = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
                           val reg2 = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*reference$""", "coord1", "coord2", "coord3", "coord4", "pagenum")
  						                bind("page", pageTemplate,
@@ -128,7 +128,8 @@ trait ShowMetataggerComponent
 //                                 "sidelabels" -> bindSidelabels(all) _,
 //						                     "segments" -> bindSegment(all) _,
 //						                     "features" -> bindFeatures(all) _,
-						                     "textboxes" -> bindTextBoxes(textBoxes, reg2) _,
+//						                     "textboxes" -> bindTextBoxes(textBoxes, reg2) _,
+                                  "textboxes" -> bindTextBoxesV2(all,reg2) _,
                                  "pagenumber" ->  Text("---- Page " + page.pagenum + " ----")
                               //,
 //						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _
@@ -142,8 +143,8 @@ trait ShowMetataggerComponent
 					}
 
 
-				val result = bind("pdfinfo", template, "filename" -> Text(w.file.toString()), "successbox" -> bindSuccessBox(doc.info) _,
-				                  "errorbox" -> bindErrorBox(doc.errors) _, "pages" -> bindPage _)
+				val result = bind("pdfinfo", template, "filename" -> Text(w.file.toString()), /*"successbox" -> bindSuccessBox(doc.info) _,
+				                  "errorbox" -> bindErrorBox(doc.errors) _,*/ "pages" -> bindPage _)
 
 // uncomment to clean the temporary directory
 //				logger.debug("Clearing temporary directory " + w.dir)
@@ -434,7 +435,7 @@ trait ShowMetataggerComponent
 			{
 			segments.flatMap
 			{
-			case ClassifiedRectangle(textbox: DocNode, features, scores, Some(x)) =>
+			case ClassifiedRectangle(textbox: DocNode, features, scores, Some(x), List()) =>
 				{
 				def bindPair(ss: Iterator[(String, Double)])(sTemplate: NodeSeq): NodeSeq =
 					{
@@ -446,7 +447,7 @@ trait ShowMetataggerComponent
 				bind("features", segmentTemplate, "features" -> bindPair(x.featureWeights.asSeq.map(f => (f._1.toString, f._2)).iterator) _,
 				     "scores" -> bindPair(x.labelWeights.asSeq.iterator) _, FuncAttrBindParam("id", (ns: NodeSeq) => Text(textbox.id), "id"))
 				}
-			case ClassifiedRectangle(textbox: DocNode, features, scores, None)    =>
+			case ClassifiedRectangle(textbox: DocNode, features, scores, None, List())    =>
 				{
 				def bindPair(ss: Iterator[(String, Double)])(sTemplate: NodeSeq): NodeSeq =
 					{
@@ -487,6 +488,33 @@ trait ShowMetataggerComponent
 				}
 			}
 			}
+
+
+    private def bindTextBoxesV2(textBoxes: Seq[ClassifiedRectangle], referencePattern:Regex)(textboxTemplate: NodeSeq): NodeSeq =
+    {
+
+      textBoxes.flatMap
+      {
+        textbox =>
+        {
+          val m4 = referencePattern.findAllIn(textbox.node.id)
+          if(!m4.isEmpty)
+          {
+            println("bound textbox to: " + textbox.node.id)
+            bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox.node , ns), "style"),
+              FuncAttrBindParam("class", (ns: NodeSeq) => Text("REFERENCE_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum"))
+                /*(ns: NodeSeq) => addId(textbox, ns)*/, "class"))
+          }
+          else
+          {
+            //println("binding textbox: " + textbox.id)
+            bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox.node, ns), "style"),
+              FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox.node, ns), "class"))
+          }
+        }
+      }
+    }
+
 
 		private def bindDelimitingBoxes(rectBoxes: Seq[DelimitingBox])(rectboxTemplate: NodeSeq): NodeSeq =
 			{
