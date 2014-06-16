@@ -319,7 +319,6 @@ trait ShowMetataggerComponent
 
         val (childrenText:String, maxChildrenWidth:Int) = addTextChildren(headL.children,1,maxWidth)
         //the children text is added
-        val finalTextWithChildren = tokenizedText + childrenText
 
         def boldenPart(tokenizedText:String):String = {
           if(tokenizedText.indexOf(":") > -1)
@@ -332,6 +331,8 @@ trait ShowMetataggerComponent
           }
 
         }
+        val finalTextWithChildren = boldenPart(tokenizedText) + childrenText
+
         headL.copy(node = new MetataggerBoxTextAtom(headL.node.id, finalTextWithChildren /*boldenPart(tokenizedText)*/ /*headL.node.text*/ /*.toUpperCase*/, "Font", 0.0f,
           new RectangleOnPage {override val page: Page = headL.node.rectangle.get.page
             override val bottom: Float = topRel + (20 * finalTextWithChildren.split("\n").length + 5 )
