@@ -7,13 +7,14 @@ import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
 import edu.umass.cs.iesl.scalacommons.Workspace
 import net.liftweb.http.RequestVar
 import net.liftweb.common.{Box, Empty}
-import net.liftweb._
+
 import scala.Some
 
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 
 import tools.nsc.io.File
+import net.liftweb._
 import http._
 
 import _root_.net.liftweb._
@@ -61,20 +62,11 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 
   val mch = reg.findAllIn(outputIdentify.toString)
 
-  if(!mch.isEmpty)
-  {
-    val width = mch group "width"
-    val height = mch group "height"
-    S.set("width", width.toString)
-    S.set("height", height.toString)
+  val height={if(!mch.isEmpty){mch group "height"}else{"792"}}
+  val width={if(!mch.isEmpty){mch group "width"}else{"612"}}
 
-  }
-  else
-  {
-    //sets the default ones
-    S.set("width", "612")
-    S.set("height", "792")
-  }
+  S.set("width",width)
+  S.set("height",height)
 
  	val convertPath = inject[String]('convert)
 	val command = convertPath + " -density 400 -verbose " + w.file + " " + outfilebase

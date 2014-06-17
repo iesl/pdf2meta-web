@@ -6,7 +6,7 @@ import net.liftweb.common.{Full, Box}
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js.JsCmd
 import scala.Predef._
-import edu.umass.cs.iesl.pdf2meta.webapp.lib.{PsToText, PdfToJpg}
+import edu.umass.cs.iesl.pdf2meta.webapp.lib.{MapToProperties, PsToText, PdfToJpg}
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter._
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import collection.Seq
@@ -19,6 +19,13 @@ import java.awt.font._
 import org.specs2.internal.scalaz.std.int
 import java.awt.Font
 import java.awt.geom.AffineTransform
+import scala.tools.nsc.io._
+import scala.Some
+import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.ClassifiedRectangle
+import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel.Page
+import net.liftweb.common.Full
+import scala.util.Random
+import scala.reflect.io.File
 
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
@@ -41,15 +48,43 @@ trait ShowMetataggerComponent
                                           "CONTENT -> BIBLIO -> REFERENCE -> AUTHORS -> AUTHOR -> AUTHOR-LAST",
                                           "CONTENT -> BIBLIO -> REFERENCE -> AUTHORS -> AUTHOR -> AUTHOR-MIDDLE")
 
+
+
 	class ShowMetatagger(implicit val bindingModule:BindingModule) extends (NodeSeq => NodeSeq) with Injectable
 		{
 		def apply(in: NodeSeq): NodeSeq =
 			{
 
-      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
+      val mapToP = new MapToProperties()
+//      val redVals = mapToP.readPropertiesFile("/pstotext/test2.properties")
+//
+//      mapToP.savePropertiesValues("/pstotext/test2.properties",Map("property3"->"valproperty3b", "property4"->"valproperty4b"))
+//      val keySet = redVals.keySet
+//
+//      val valSet = redVals.values
+
+//      println(redVals.get("property3").get)
+//      println(redVals.get("property4").get)
+
+      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception")){
+        object TempDirFactory {
+          // this just recapitulates Directory.makeTemp, except that deleteOnExit can be disabled
+          def apply(): Directory = {
+            println("inside new implementation")
+            val jfile = java.io.File.createTempFile(Random.alphanumeric take 6 mkString, null, null)
+            // jfile.deleteOnExit()
+            val path = new File(jfile)
+            path.delete()
+            path.createDirectory()
+          }
+        }
+
+      }
+
 
       val psToText: PsToText = new PsToText(w)
       val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
+
 //      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.pdf"))
 //
 //      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
@@ -71,6 +106,7 @@ trait ShowMetataggerComponent
 				//** could use pdfbox converter here
 				val pdfToJpg: PdfToJpg = new PdfToJpg(w) // stores images in session as side effect
 
+        //mapToP.addToProperties()
 				logger.debug("PDF image generation done ")
 				val extractTime = new Date()
 				logger.debug("PDF image generation took " + ((extractTime.getTime - startTime.getTime)) + " milliseconds")
@@ -80,12 +116,8 @@ trait ShowMetataggerComponent
 				logger.debug("Conversion pipeline done ")
 				val pipelineTime = new Date()
 				logger.debug("Conversion pipeline took " + ((pipelineTime.getTime - extractTime.getTime)) + " milliseconds")
-//
-//				val allDelimitingBoxes: Seq[DelimitingBox] = doc.delimitingBoxes
-//				val allWhitespaceBoxes: Seq[WhitespaceBox] = doc.whitespaceBoxes
 
-//				val allTextBoxes: Seq[DocNode] = doc.children //textBoxChildren
-          println("the following value was saved in session: " + S.get("varv"))
+        println("the following value was saved in session: " + S.get("varv"))
 				def bindPage(pageTemplate: NodeSeq): NodeSeq =
 					{
 
@@ -102,40 +134,17 @@ trait ShowMetataggerComponent
 
 						                val image = pageimages.get(page.pagenum).imageUrl
 
-//						                val delimitingBoxes = allDelimitingBoxes.filter(_.rectangle match
-//						                                                                {
-//							                                                                case Some(x) => x.page == page;
-//							                                                                case None    => false;
-//						                                                                })
-//						                val whitespaceBoxes = allWhitespaceBoxes.filter(_.rectangle match
-//						                                                                {
-//							                                                                case Some(x) => x.page == page;
-//							                                                                case None    => false;
-//						                                                                })
-//						                val textBoxes = allTextBoxes.filter(_.rectangle match
-//						                                                    {
-//							                                                    case Some(x) => x.page == page;
-//							                                                    case None    => false;
-//						                                                    })
                           val reg = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
                           val reg2 = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*reference$""", "coord1", "coord2", "coord3", "coord4", "pagenum")
  						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
+                                FuncAttrBindParam("style", (ns: NodeSeq) => addPlainCoords("0","0",pdfToJpg.width,pdfToJpg.height,ns), "style"),
 						                     "image" -> image,
                                  "externallabels" -> bindExternalLabels(all, List(), "", "visible",
                                    reg
                                  ) _,
-//                                 "sidelabels" -> bindSidelabels(all) _,
-//						                     "segments" -> bindSegment(all) _,
-//						                     "features" -> bindFeatures(all) _,
-//						                     "textboxes" -> bindTextBoxes(textBoxes, reg2) _,
                                   "textboxes" -> bindTextBoxesV2(all,reg2) _,
                                  "pagenumber" ->  Text("---- Page " + page.pagenum + " ----")
-                              //,
-//						                     "delimitingboxes" -> bindDelimitingBoxes(delimitingBoxes) _
-//						                     "whitespaceboxes" -> bindWhitespaceBoxes(textBoxes) _
-//						                     "discardboxes" -> bindDiscardBoxes(discarded.map(_.node)) _,
-//						                     "readingorder" -> bindReadingOrder(page, ReadingOrderPair.joinPairs(legit.map(_.node).toList)) _)
                             )
 						                };
 					                }
@@ -661,6 +670,15 @@ trait ShowMetataggerComponent
         "px; left: " + rr.page.rectangle.width +
         "px; width: " + ((r.rectangle.get.right - r.rectangle.get.left).toInt + 12) +
         "px; height: " + (r.rectangle.get.bottom - r.rectangle.get.top) +  "px; ") ++ ns
+    }
+
+    private def addPlainCoords(left:String, top:String, width:String, height:String, ns:NodeSeq): NodeSeq =
+    {
+      Text("position: relative; top: " + top +
+        //(rr.page.rectangle.height - rr.top) +
+        "px; left: " + left +
+        "px; width: " + width +
+        "px; height: " + height + "px; " ) ++ ns
     }
 
 		}

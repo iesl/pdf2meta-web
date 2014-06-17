@@ -21,7 +21,8 @@ object Pdf2MetaWebBuild extends Build {
     classutil(),
     jetty("6.1.26"),
     jettyContainer("6.1.26"),
-    "com.escalatesoft.subcut" %% "subcut" % "2.0"//,
+    "com.escalatesoft.subcut" %% "subcut" % "2.0",
+    "com.typesafe" % "config" % "1.2.1"
   )
 
   lazy val pdf2meta = ProjectRef(new java.io.File("../pdf2meta"), "pdf2meta")
