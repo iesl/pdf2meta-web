@@ -27,36 +27,37 @@ import _root_.net.liftweb._
  */
 class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends Logging with Injectable
 	{
-  object loginType extends RequestVar[Box[String]](Empty)
+
+  //  def runCommand(commandToRun:String) =
+  //  {
+  //
+  //      logger.info("Running " + commandToRun)
+  //      val pb = Process(commandToRun)
+  //      val sb = StringBuilder.newBuilder
+  //      val sbe = StringBuilder.newBuilder
+  //      val pio = new ProcessIO(_ => (), stdout => scala.io.Source.fromInputStream(stdout).getLines().foreach(sb append _),
+  //        stderr => scala.io.Source.fromInputStream(stderr).getLines().foreach(sbe append _))
+  //
+  //      val p = pb.run(pio)
+  //      val exitCode = p.exitValue()
+  //
+  //      val output = sb toString()
+  //      val errors = sbe toString()
+  //      logger.info(output)
+  //      logger.info(errors)
+  //      logger.info("Finished running (" + exitCode + ") " + commandToRun)
+  //      output
+  //  }
+
+//  object loginType extends RequestVar[Box[String]](Empty)
 	val outfilebase = w.dir + "/" + w.filename + ".jpg";
 
-  def runCommand(commandToRun:String) =
-  {
-
-      logger.info("Running " + commandToRun)
-      val pb = Process(commandToRun)
-      val sb = StringBuilder.newBuilder
-      val sbe = StringBuilder.newBuilder
-      val pio = new ProcessIO(_ => (), stdout => scala.io.Source.fromInputStream(stdout).getLines().foreach(sb append _),
-        stderr => scala.io.Source.fromInputStream(stderr).getLines().foreach(sbe append _))
-
-      val p = pb.run(pio)
-      val exitCode = p.exitValue()
-
-      val output = sb toString()
-      val errors = sbe toString()
-      logger.info(output)
-      logger.info(errors)
-      logger.info("Finished running (" + exitCode + ") " + commandToRun)
-      output
-
-  }
   //gets the dimension of pdf first page, assuming that the rest of the pages have the same size
 
   val identifyPath = inject[String]('identify)
   val commandIdentify = identifyPath + " " + w.file
 
-  val outputIdentify =runCommand(commandIdentify)
+  val outputIdentify = linuxCommandExecuter.runCommand(commandIdentify)
 
   val reg = new scala.util.matching.Regex(""" ([\d]+)x([\d]+) """, "width", "height")
 
@@ -72,7 +73,11 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 	val command = convertPath + " -density 400 -verbose " + w.file + " " + outfilebase
 
 
-  val output = runCommand(command)
+  val output = linuxCommandExecuter.runCommand(command)
+
+  //----here ends the image extraction
+
+
 
 	val outfiles: Map[Int, PageImage] =
 		{

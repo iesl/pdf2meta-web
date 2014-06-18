@@ -34,4 +34,19 @@ class MapToProperties {
     val toWrite:Map[String,String] = readPropertiesFile(fileName) ++ properties
     savePropertiesValues(fileName, toWrite)
   }
+
+  def addOrReplaceValue(fileName:String,property:String,value:String)
+  {
+    val allProperties:Map[String,String] = readPropertiesFile(fileName)
+
+    val filteredProperty = {if(allProperties.get(property)!=None){
+      allProperties - property
+    }else{allProperties}}
+
+    val entry = Map(property -> value)
+
+    savePropertiesValues(fileName,filteredProperty ++ entry)
+  }
+
+
 }

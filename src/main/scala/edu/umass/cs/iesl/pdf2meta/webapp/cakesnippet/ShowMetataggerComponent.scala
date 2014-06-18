@@ -6,7 +6,7 @@ import net.liftweb.common.{Full, Box}
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js.JsCmd
 import scala.Predef._
-import edu.umass.cs.iesl.pdf2meta.webapp.lib.{MapToProperties, PsToText, PdfToJpg}
+import edu.umass.cs.iesl.pdf2meta.webapp.lib.{Pdf2MetaWorkspace, MapToProperties, PsToText, PdfToJpg}
 import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter._
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import collection.Seq
@@ -66,20 +66,10 @@ trait ShowMetataggerComponent
 //      println(redVals.get("property3").get)
 //      println(redVals.get("property4").get)
 
-      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception")){
-        object TempDirFactory {
-          // this just recapitulates Directory.makeTemp, except that deleteOnExit can be disabled
-          def apply(): Directory = {
-            println("inside new implementation")
-            val jfile = java.io.File.createTempFile(Random.alphanumeric take 6 mkString, null, null)
-            // jfile.deleteOnExit()
-            val path = new File(jfile)
-            path.delete()
-            path.createDirectory()
-          }
-        }
+      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
-      }
+      val wNewStructure = new Pdf2MetaWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
+
 
 
       val psToText: PsToText = new PsToText(w)
