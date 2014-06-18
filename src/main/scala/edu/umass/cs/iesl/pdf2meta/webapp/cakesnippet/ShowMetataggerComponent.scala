@@ -66,13 +66,13 @@ trait ShowMetataggerComponent
 //      println(redVals.get("property3").get)
 //      println(redVals.get("property4").get)
 
-      val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
+      //val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
       val wNewStructure = new Pdf2MetaWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
 
 
-      val psToText: PsToText = new PsToText(w)
+      val psToText: PsToText = new PsToText(wNewStructure/*w*/)
       val w_xml = new StreamWorkspace(psToText.outFilenameRunCrf , new FileInputStream(psToText.outFileRunCrf))
 
 //      val w = new StreamWorkspace("output_pstotext_runcrf_v2.pdf", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.pdf"))
@@ -82,9 +82,9 @@ trait ShowMetataggerComponent
 
 
 
-      val length: Box[Text] = Full(Text(w.file.length.toString))
+      val length: Box[Text] = Full(Text(wNewStructure.file.length.toString /*w.file.length.toString*/))
 
-			val filename: Box[Text] = Full(Text(w.filename))
+			val filename: Box[Text] = Full(Text(wNewStructure.file.length.toString /*w.filename*/))
 
 			def bindPdfInfo(template: NodeSeq): NodeSeq =
 				{
@@ -94,7 +94,12 @@ trait ShowMetataggerComponent
 				logger.debug("Running PDF image generation...")
 
 				//** could use pdfbox converter here
-				val pdfToJpg: PdfToJpg = new PdfToJpg(w) // stores images in session as side effect
+				val pdfToJpg: PdfToJpg = new PdfToJpg(wNewStructure /*w*/) // stores images in session as side effect
+        val props:MapToProperties = new MapToProperties()
+          val propertiesFilename:String =
+            S.get("propertiesFile").openOrThrowException("err while obtaining properties file")
+
+          val properties:Map[String,String] = props.readPropertiesFile(propertiesFilename)
 
         //mapToP.addToProperties()
 				logger.debug("PDF image generation done ")
@@ -124,11 +129,13 @@ trait ShowMetataggerComponent
 
 						                val image = pageimages.get(page.pagenum).imageUrl
 
-                          val reg = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
-                          val reg2 = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*reference$""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+                            val reg = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+                            val reg2 = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*reference$""", "coord1", "coord2", "coord3", "coord4", "pagenum")
  						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
-                                FuncAttrBindParam("style", (ns: NodeSeq) => addPlainCoords("0","0",pdfToJpg.width,pdfToJpg.height,ns), "style"),
+                                FuncAttrBindParam("style", (ns: NodeSeq) => addPlainCoords("0","0",
+                                  properties.get("width").get /*pdfToJpg.width*/,
+                                  properties.get("height").get /*pdfToJpg.height*/,ns), "style"),
 						                     "image" -> image,
                                  "externallabels" -> bindExternalLabels(all, List(), "", "visible",
                                    reg

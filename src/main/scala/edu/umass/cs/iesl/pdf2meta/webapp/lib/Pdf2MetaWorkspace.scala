@@ -23,12 +23,16 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
     instream.close()
     outstream.close()
 
-    //reads the .properties file to determine where the main properties file is located
+    def getOnlyFileName(fileName:String):String =
+    {
+      fileName.substring(0,fileName.lastIndexOf("."))
+    }
     def getPropertyFileName(fileName:String):String =
     {
-      fileName.substring(0,fileName.lastIndexOf(".")) + ".properties"
+      getOnlyFileName(fileName) + ".properties"
     }
-    val mainPropertiesLocation = inject[String]('properties_path) + getPropertyFileName(filename)
+    val propertiesPath = inject[String]('properties_path)
+    val mainPropertiesLocation = propertiesPath + getPropertyFileName(filename)
 
     S.set("propertiesFile",mainPropertiesLocation)
 
@@ -39,29 +43,46 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
 
     def getDirAndFile():(scala.reflect.io.Directory, scala.reflect.io.File)=
     {
+
       if((properties.get("pdflocation")!=None && properties.get("pdflocation").get.trim!="" &&
         linuxCommandExecuter.runCommand("diff " + properties.get("pdflocation").get +
-          " " + d + File.separator + filename).trim!="") || properties.get("pdflocation")==None ||
-            properties.get("pdflocation").get.trim=="")
+          " " + d + File.separator + filename).trim!=""))
       {
-          linuxCommandExecuter.runCommand("cp " + d + File.separator + filename + " " +
+        linuxCommandExecuter.runCommand("cp " + d + File.separator + filename + " " +
                 properties.get("pdflocation").get)
-          propertiesMapper.savePropertiesValues(mainPropertiesLocation,
-                                      Map("pdflocation" -> properties.get("pdflocation").get))
+        propertiesMapper.savePropertiesValues(mainPropertiesLocation,
+                                      Map("pdflocation" -> properties.get("pdflocation").get,
+                                          "ispdfalreadyparsed" -> "false" ))
 
       }
+      else if(properties.get("pdflocation")==None ||
+                    properties.get("pdflocation").get.trim=="")
+      {
+        val pdfDir = propertiesPath + File.separator + "data" + File.separator + getOnlyFileName(filename)
 
-      (File(properties.get("pdflocation").get.substring(0, properties.get("pdflocation").get.lastIndexOf("/"))).createDirectory(),
-            File(properties.get("pdflocation").get))
+        File(pdfDir).createDirectory(force=true)
+
+        linuxCommandExecuter.runCommand("cp " + d + File.separator + filename + " " +
+          pdfDir + File.separator)
+        propertiesMapper.savePropertiesValues(mainPropertiesLocation,
+          Map("pdflocation" -> (pdfDir + File.separator + filename),
+            "ispdfalreadyparsed" -> "false" ))
+      }
+      else
+      {
+        propertiesMapper.addOrReplaceValue(mainPropertiesLocation, "ispdfalreadyparsed", "true")
+      }
+
+      val modifiedProperties:Map[String,String] = propertiesMapper.readPropertiesFile(mainPropertiesLocation)
+      (File(modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/"))).createDirectory(),
+            File(modifiedProperties.get("pdflocation").get))
     }
 
     val(dir,file) = getDirAndFile()
     //deletes the temp file
     d.deleteRecursively()
 
-
     (dir,file)
-
   }
 
   def clean() {

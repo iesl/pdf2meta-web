@@ -9,6 +9,7 @@ import net.liftweb.http.RequestVar
 import net.liftweb.common.{Box, Empty}
 
 import scala.Some
+import scala.reflect.io.Directory
 
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
@@ -50,48 +51,82 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
   //  }
 
 //  object loginType extends RequestVar[Box[String]](Empty)
-	val outfilebase = w.dir + "/" + w.filename + ".jpg";
+  val props:MapToProperties = new MapToProperties()
+  val propertiesFilename:String =
+    S.get("propertiesFile").openOrThrowException("err while obtaining properties file")
 
-  //gets the dimension of pdf first page, assuming that the rest of the pages have the same size
+  val properties:Map[String,String] = props.readPropertiesFile(propertiesFilename)
 
-  val identifyPath = inject[String]('identify)
-  val commandIdentify = identifyPath + " " + w.file
+  def imageAlreadyExists() = {
+    (properties.get("imagedir")==None || properties.get("width")==None || properties.get("height") == None)
+  }
 
-  val outputIdentify = linuxCommandExecuter.runCommand(commandIdentify)
+  def getUpdatedProperties(properties:Map[String,String]):Map[String,String] =
+  {
+    if(!imageAlreadyExists) {
+      val outfilebase = w.dir + "/" + w.filename + ".jpg";
 
-  val reg = new scala.util.matching.Regex(""" ([\d]+)x([\d]+) """, "width", "height")
+      //gets the dimension of pdf first page, assuming that the rest of the pages have the same size
 
-  val mch = reg.findAllIn(outputIdentify.toString)
+      val identifyPath = inject[String]('identify)
+      val commandIdentify = identifyPath + " " + w.file
 
-  val height={if(!mch.isEmpty){mch group "height"}else{"792"}}
-  val width={if(!mch.isEmpty){mch group "width"}else{"612"}}
+      val outputIdentify = linuxCommandExecuter.runCommand(commandIdentify)
 
-  S.set("width",width)
-  S.set("height",height)
+      val reg = new scala.util.matching.Regex( """ ([\d]+)x([\d]+) """, "width", "height")
 
- 	val convertPath = inject[String]('convert)
-	val command = convertPath + " -density 400 -verbose " + w.file + " " + outfilebase
+      val mch = reg.findAllIn(outputIdentify.toString)
+
+      val height = {
+        if (!mch.isEmpty) {
+          mch group "height"
+        } else {
+          "792"
+        }
+      }
+      val width = {
+        if (!mch.isEmpty) {
+          mch group "width"
+        } else {
+          "612"
+        }
+      }
+
+//      S.set("width", width)
+//      S.set("height", height)
+      props.addOrReplaceValue(propertiesFilename,"width",width)
+      props.addOrReplaceValue(propertiesFilename,"height",height)
+      props.addOrReplaceValue(propertiesFilename,"imagedir",w.dir.path)
+
+      val convertPath = inject[String]('convert)
+      val command = convertPath + " -density 400 -verbose " + w.file + " " + outfilebase
 
 
-  val output = linuxCommandExecuter.runCommand(command)
-
+      val output = linuxCommandExecuter.runCommand(command)
+      props.readPropertiesFile(propertiesFilename)
+    }
+    else
+    {
+      properties
+    }
+  }
   //----here ends the image extraction
 
-
+  val updatedProperties:Map[String,String] = getUpdatedProperties(properties)
 
 	val outfiles: Map[Int, PageImage] =
 		{
 		val pageidRE = "-(\\d+)\\.jpg".r
-
-		val elements: Iterator[Option[(Int, PageImage)]] = for (f <- w.dir.files) yield
+    val imDir = Directory(updatedProperties.get("imagedir").get)
+		val elements: Iterator[Option[(Int, PageImage)]] = for (f <- imDir.files /*w.dir.files*/) yield
 			{
 			try
 			{
 			val r = pageidRE findFirstIn f.segments.last;
 			val pageidRE(pageidStr) = r.getOrElse()
 			val pageid = pageidStr.toInt + 1
-			Some(pageid -> new PageImage(pageid, f, "image/jpg", S.get("width").openOrThrowException("err in width"),
-        S.get("height").openOrThrowException("err in height")))
+			Some(pageid -> new PageImage(pageid, f, "image/jpg", updatedProperties.get("width").get /*S.get("width").openOrThrowException("err in width")*/,
+          updatedProperties.get("height").get)/*S.get("height").openOrThrowException("err in height"))*/)
 			}
 			catch
 			{
@@ -103,7 +138,7 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 			}
 			}
 		elements.flatten.toMap
-		}
+	}
 
 	if (outfiles.isEmpty)
 		{
@@ -111,8 +146,10 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 		val f = File(w.file.toString() + ".jpg")
 		if (f.exists)
 			{
-			pageimages.set(Map((1, new PageImage(1, f, "image/jpg", S.get("width").openOrThrowException("err in width"),
-                S.get("height").openOrThrowException("err in height")))))
+			pageimages.set(Map((1, new PageImage(1, f, "image/jpg", updatedProperties.get("width").get
+			          /*S.get("width").openOrThrowException("err in width")*/,
+                updatedProperties.get("height").get
+                /*S.get("height").openOrThrowException("err in height")*/))))
 			}
 		else
 			{
