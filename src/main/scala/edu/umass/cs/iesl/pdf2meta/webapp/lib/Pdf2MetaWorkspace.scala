@@ -32,7 +32,7 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
       getOnlyFileName(fileName) + ".properties"
     }
     val propertiesPath = inject[String]('properties_path)
-    val mainPropertiesLocation = propertiesPath + getPropertyFileName(filename)
+    val mainPropertiesLocation = propertiesPath + File.separator + getPropertyFileName(filename)
 
     S.set("propertiesFile",mainPropertiesLocation)
 
@@ -58,7 +58,7 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
       else if(properties.get("pdflocation")==None ||
                     properties.get("pdflocation").get.trim=="")
       {
-        val pdfDir = propertiesPath + File.separator + "data" + File.separator + getOnlyFileName(filename)
+        val pdfDir = inject[String]('data_path) + File.separator + getOnlyFileName(filename)
 
         File(pdfDir).createDirectory(force=true)
 
@@ -74,6 +74,10 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
       }
 
       val modifiedProperties:Map[String,String] = propertiesMapper.readPropertiesFile(mainPropertiesLocation)
+
+      println(modifiedProperties.get("pdflocation").get)
+      println(modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/")))
+
       (File(modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/"))).createDirectory(),
             File(modifiedProperties.get("pdflocation").get))
     }

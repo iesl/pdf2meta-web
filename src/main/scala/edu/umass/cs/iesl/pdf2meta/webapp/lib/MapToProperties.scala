@@ -18,15 +18,35 @@ class MapToProperties {
   {
     val conf:Config = ConfigFactory.parseFile(new java.io.File(fileName))
     val convSet = scala.collection.JavaConverters.asScalaSetConverter(conf.entrySet()).asScala
-    val finMap = (convSet.map(x=>x.getKey) zip convSet.map(x=>x.getValue.render().substring(1,x.getValue.render().length-1))).toMap
-    finMap
+
+    val testres = convSet.map(x=> (Map(x.getKey -> x.getValue)))
+    def convertToMap(setOfMap:scala.collection.mutable.Set[Map[String,ConfigValue]]):Map[String,String] =
+    {
+      val nextValue = setOfMap.head.valuesIterator.next().render()
+      if(setOfMap.size>1)
+      {
+        Map(setOfMap.head.keysIterator.next() -> nextValue.substring(1, nextValue.length-1) ) ++ convertToMap(setOfMap.tail)
+      }
+      else
+      {
+//        val nextValue = setOfMap.head.valuesIterator.next().render()
+        Map(setOfMap.head.keysIterator.next() -> nextValue.substring(1, nextValue.length-1) )
+      }
+    }
+    val testres2 = convertToMap(testres)
+
+    testres2
+
+//    val finMap = (convSet.map(x=>x.getKey) zip convSet.map(x=>x.getValue.render().substring(1,x.getValue.render().length-1))).toMap
+//    finMap
   }
 
   def savePropertiesValues(fileName:String, properties:Map[String,String])
   {
-    val c:Config = ConfigFactory.parseMap(scala.collection.JavaConversions.mapAsJavaMap(properties))
-    println(c.root().render(ConfigRenderOptions.defaults().setJson(false)))
-    scala.tools.nsc.io.File(fileName).writeAll(c.root().render(ConfigRenderOptions.defaults().setJson(false)))
+    val mapped = scala.collection.JavaConversions.mapAsJavaMap(properties)
+    val c:Config = ConfigFactory.parseMap(mapped)
+    println(c.root().render(ConfigRenderOptions.defaults().setJson(false).setComments(false).setFormatted(false).setOriginComments(false)))
+    scala.tools.nsc.io.File(fileName).writeAll(c.root().render(ConfigRenderOptions.defaults().setJson(false).setComments(false).setOriginComments(false)).replaceAll("=\"","=").replaceAll("\"\n","\n") )
   }
 
   def addToProperties(fileName:String,properties:Map[String,String])

@@ -158,4 +158,6 @@ object ProjectConfiguration extends NewBindingModule({
     bind[String] idBy 'pstotext toSingle props.getProperty("pstotext")
     bind[String] idBy 'pstotext_path toSingle props.getProperty("pstotext_path")
     bind[String] idBy 'runcrf_path toSingle props.getProperty("runcrf_path")
+    bind[String] idBy 'properties_path toSingle props.getProperty("properties_path")
+    bind[String] idBy 'data_path toSingle props.getProperty("data_path")
 })

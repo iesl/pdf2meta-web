@@ -55,16 +55,6 @@ trait ShowMetataggerComponent
 		def apply(in: NodeSeq): NodeSeq =
 			{
 
-      val mapToP = new MapToProperties()
-//      val redVals = mapToP.readPropertiesFile("/pstotext/test2.properties")
-//
-//      mapToP.savePropertiesValues("/pstotext/test2.properties",Map("property3"->"valproperty3b", "property4"->"valproperty4b"))
-//      val keySet = redVals.keySet
-//
-//      val valSet = redVals.values
-
-//      println(redVals.get("property3").get)
-//      println(redVals.get("property4").get)
 
       //val w = new StreamWorkspace(filenameBox.get.openOrThrowException("exception") , filestreamBox.get.openOrThrowException("exception"))
 
@@ -149,8 +139,8 @@ trait ShowMetataggerComponent
 					}
 
 
-				val result = bind("pdfinfo", template, "filename" -> Text(w.file.toString()), /*"successbox" -> bindSuccessBox(doc.info) _,
-				                  "errorbox" -> bindErrorBox(doc.errors) _,*/ "pages" -> bindPage _)
+				val result = bind("pdfinfo", template, "filename" -> Text(wNewStructure.file.toString() /*w.file.toString()*/ ),
+				               "pages" -> bindPage _)
 
 // uncomment to clean the temporary directory
 //				logger.debug("Clearing temporary directory " + w.dir)
