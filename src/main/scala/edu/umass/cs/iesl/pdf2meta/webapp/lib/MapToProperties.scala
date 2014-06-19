@@ -3,9 +3,7 @@ package edu.umass.cs.iesl.pdf2meta.webapp.lib
 
 import com.typesafe.config.{ConfigRenderOptions, ConfigFactory, Config}
 import com.typesafe.config.ConfigValue
-import com.typesafe.config.ConfigValueFactory
-import scala.util.matching.Regex
-import java.io.File
+
 
 /**
  * Created by klimzaporojets on 6/17/14.
@@ -22,23 +20,28 @@ class MapToProperties {
     val testres = convSet.map(x=> (Map(x.getKey -> x.getValue)))
     def convertToMap(setOfMap:scala.collection.mutable.Set[Map[String,ConfigValue]]):Map[String,String] =
     {
-      val nextValue = setOfMap.head.valuesIterator.next().render()
       if(setOfMap.size>1)
       {
+        val nextValue = setOfMap.head.valuesIterator.next().render()
         Map(setOfMap.head.keysIterator.next() -> nextValue.substring(1, nextValue.length-1) ) ++ convertToMap(setOfMap.tail)
       }
       else
       {
 //        val nextValue = setOfMap.head.valuesIterator.next().render()
-        Map(setOfMap.head.keysIterator.next() -> nextValue.substring(1, nextValue.length-1) )
+        if(setOfMap.size>0) {
+          val nextValue = setOfMap.head.valuesIterator.next().render()
+          Map(setOfMap.head.keysIterator.next() -> nextValue.substring(1, nextValue.length - 1))
+        }
+        else
+        {
+          Map()
+        }
       }
     }
     val testres2 = convertToMap(testres)
 
     testres2
 
-//    val finMap = (convSet.map(x=>x.getKey) zip convSet.map(x=>x.getValue.render().substring(1,x.getValue.render().length-1))).toMap
-//    finMap
   }
 
   def savePropertiesValues(fileName:String, properties:Map[String,String])
@@ -67,6 +70,5 @@ class MapToProperties {
 
     savePropertiesValues(fileName,filteredProperty ++ entry)
   }
-
 
 }

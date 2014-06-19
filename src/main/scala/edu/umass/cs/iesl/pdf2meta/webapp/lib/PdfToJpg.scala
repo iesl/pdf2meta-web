@@ -29,26 +29,6 @@ import _root_.net.liftweb._
 class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends Logging with Injectable
 	{
 
-  //  def runCommand(commandToRun:String) =
-  //  {
-  //
-  //      logger.info("Running " + commandToRun)
-  //      val pb = Process(commandToRun)
-  //      val sb = StringBuilder.newBuilder
-  //      val sbe = StringBuilder.newBuilder
-  //      val pio = new ProcessIO(_ => (), stdout => scala.io.Source.fromInputStream(stdout).getLines().foreach(sb append _),
-  //        stderr => scala.io.Source.fromInputStream(stderr).getLines().foreach(sbe append _))
-  //
-  //      val p = pb.run(pio)
-  //      val exitCode = p.exitValue()
-  //
-  //      val output = sb toString()
-  //      val errors = sbe toString()
-  //      logger.info(output)
-  //      logger.info(errors)
-  //      logger.info("Finished running (" + exitCode + ") " + commandToRun)
-  //      output
-  //  }
 
 //  object loginType extends RequestVar[Box[String]](Empty)
   val props:MapToProperties = new MapToProperties()
@@ -58,7 +38,7 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
   val properties:Map[String,String] = props.readPropertiesFile(propertiesFilename)
 
   def imageAlreadyExists() = {
-    (properties.get("imagedir")==None || properties.get("width")==None || properties.get("height") == None)
+    ((properties.get("imagedir")!=None) && !(properties.get("width")==None) && !(properties.get("height") == None))
   }
 
   def getUpdatedProperties(properties:Map[String,String]):Map[String,String] =

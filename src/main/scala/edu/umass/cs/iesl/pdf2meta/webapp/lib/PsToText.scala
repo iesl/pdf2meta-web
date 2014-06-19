@@ -18,31 +18,6 @@ import tools.nsc.io.File
  */
 class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends Logging with Injectable {
 
-  //function to run any command not involving pipelining and redirections
-//  def runCommand(commandToRun:String) =
-//  {
-//
-//    logger.info("Running " + commandToRun)
-//    val pb = Process(commandToRun)
-//    val sb = StringBuilder.newBuilder
-//    val sbe = StringBuilder.newBuilder
-//    val pio = new ProcessIO(_ => (), stdout => scala.io.Source.fromInputStream(stdout).getLines().foreach(sb append _),
-//      stderr => scala.io.Source.fromInputStream(stderr).getLines().foreach(sbe append _))
-//
-//    val p = pb.run(pio)
-//    val exitCode = p.exitValue()
-//
-//    val output = sb toString()
-//    val errors = sbe toString()
-//    logger.info(output)
-//    logger.info(errors)
-//    logger.info("Finished running (" + exitCode + ") " + commandToRun)
-//    output + errors
-//
-//  }
-
-
-
   val props:MapToProperties = new MapToProperties()
   val propertiesFilename:String =
     S.get("propertiesFile").openOrThrowException("err while obtaining properties file")
@@ -54,10 +29,6 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 
   if(properties.get("ispdfalreadyparsed").get=="false")
   {
-
-
-
-
     val outFilePsToText = filePath + "/" + w.filename + ".xml";
 
     val convertPath:String = inject[String]('pstotext)
@@ -65,19 +36,6 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
     val runcrfFilePath = inject[String]('runcrf_path)
 
     //check if the pdf file exists already and if it is the same using diff command
-
-//    println ("result of executing diff " + filePath + "/" + w.filename + " " + w.file + ": " +
-//                linuxCommandExecuter.runCommand("diff " + filePath + "/" + w.filename + " " + w.file ))
-//
-//    println ("trim?: " + (linuxCommandExecuter.runCommand("diff " + filePath + "/" + w.filename + " " + w.file).trim==""))
-//
-//    println ("result of executing ls " + filePath + "/" + w.filename + ": " +
-//      linuxCommandExecuter.runCommand("ls " + filePath + "/" + w.filename ))
-//
-//    if(linuxCommandExecuter.runCommand("ls " + filePath + "/" + w.filename ).contains("No such file") ||
-//      linuxCommandExecuter.runCommand("diff " + filePath + "/" + w.filename + " " + w.file).trim!="") {
-      //if the files are not the same, the pdf is copied and all process is done
-//      linuxCommandExecuter.runCommand("cp " + w.file + " " + filePath + "/" + w.filename)
 
       val output = {
         val result = (convertPath + " " + w.file).toString #> new java.io.File(outFilePsToText) !
@@ -93,7 +51,7 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
       }
 
       val resRuncrf = (sys.process.Process(Seq("echo", outFilePsToText + " -> " + outFileRunCrf)) #| sys.process.Process("bin/runcrf", new java.io.File(runcrfFilePath))).!!
-  //  }
+
       props.addOrReplaceValue(propertiesFilename,"ispdfalreadyparsed","true")
   }
 
