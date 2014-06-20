@@ -44,6 +44,10 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
   def getUpdatedProperties(properties:Map[String,String]):Map[String,String] =
   {
     if(!imageAlreadyExists) {
+      S.set("state","uploading")
+      S.set("message","60%: converting pdf to jpg")
+      S.set("percentage","60")
+
       val outfilebase = w.dir + "/" + w.filename + ".jpg";
 
       //gets the dimension of pdf first page, assuming that the rest of the pages have the same size

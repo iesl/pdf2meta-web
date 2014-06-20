@@ -20,8 +20,8 @@ class MetataggerExamples(implicit val bindingModule:BindingModule) extends Injec
  {
 
   S.set("state","uploading")
-  S.set("message","0%: upload not initialized")
-  S.set("percentage","0")
+  S.set("message","1%: initializing")
+  S.set("percentage","1")
 
   val exampleDirPath = inject[String]('examples)
 //  println("The path that fails is: " + exampleDirPath)

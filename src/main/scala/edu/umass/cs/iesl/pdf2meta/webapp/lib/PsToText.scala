@@ -29,6 +29,10 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 
   if(properties.get("ispdfalreadyparsed").get=="false")
   {
+    S.set("state","uploading")
+    S.set("message","20%: running pstotext")
+    S.set("percentage","20")
+
     val outFilePsToText = filePath + "/" + w.filename + ".xml";
 
     val convertPath:String = inject[String]('pstotext)
@@ -49,6 +53,9 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
       if (!f.exists) {
         throw new PdfConversionException("no xml file to parse found: " + outFilePsToText)
       }
+      S.set("state","uploading")
+      S.set("message","40%: running metatagger (may take several minutes)")
+      S.set("percentage","40")
 
       val resRuncrf = (sys.process.Process(Seq("echo", outFilePsToText + " -> " + outFileRunCrf)) #| sys.process.Process("bin/runcrf", new java.io.File(runcrfFilePath))).!!
 
