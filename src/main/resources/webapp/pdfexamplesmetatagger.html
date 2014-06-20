@@ -29,7 +29,12 @@
     <!--<lift:UploadProgressDemo.script />-->
 
     <link rel="stylesheet" type="text/css" src="/static/tooltip.css" />
+<script type="text/javascript">
+function uploadFile() {
 
+	document.getElementById("form1").submit();
+}
+</script>
 
 	<style type="text/css">
 		.edit_error_class {
@@ -108,7 +113,7 @@
 	<div class="column span-24 last">
 		<div>
 	<p>
-		<lift:snippet type="Uploadertometatagger:upload" form="post" multipart="true">
+		<lift:snippet type="Uploadertometatagger:upload" form="post" multipart="true" id="form1">
 			<choose:post>
 				Should redirect
 			</choose:post>
@@ -116,8 +121,8 @@
 			<choose:get>
 				Select a PDF file to upload:
 				<ul:file_upload></ul:file_upload>
-				<br/>
-				<input type="submit" value="Upload File"/>
+				<!--<br/>
+				<input type="submit" value="Upload File"/>-->
         <div id="uploading">
             <div id="progress" class="bar">
                 <div id="progressbar">&nbsp;</div>
@@ -128,7 +133,15 @@
 
 		</lift:snippet>
 	</p>
-
+	<script type="text/javascript">
+for(i=0; i<document.getElementById("form1").elements.length; i++){
+	if(document.getElementById("form1").elements[i].type=="file")
+	{
+		//document.getElementById("form1").elements[i].onchange = function() { uploadFile(); };
+	}
+}
+</script>
+<!--uploadFile(); return true; -->
 				<lift:pdfexamplesmetatagger>
 				<p>Or view one of <examples:count/> existing examples:</p>
 					<examples:example>
