@@ -74,7 +74,7 @@ trait ShowMetataggerComponent
 
       val length: Box[Text] = Full(Text(wNewStructure.file.length.toString /*w.file.length.toString*/))
 
-			val filename: Box[Text] = Full(Text(wNewStructure.file.length.toString /*w.filename*/))
+			val filename: Box[Text] = Full(Text(wNewStructure.file.name.toString /*w.filename*/))
 
 			def bindPdfInfo(template: NodeSeq): NodeSeq =
 				{
@@ -143,7 +143,7 @@ trait ShowMetataggerComponent
 					}
 
 
-				val result = bind("pdfinfo", template, "filename" -> Text(wNewStructure.file.toString() /*w.file.toString()*/ ),
+				val result = bind("pdfinfo", template, //"filename" -> Text(wNewStructure.file.toString() /*w.file.toString()*/ ),
 				               "pages" -> bindPage _)
 
 // uncomment to clean the temporary directory
