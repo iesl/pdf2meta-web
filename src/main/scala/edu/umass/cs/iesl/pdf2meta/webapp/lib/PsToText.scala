@@ -1,17 +1,21 @@
 package edu.umass.cs.iesl.pdf2meta.webapp.lib
 //import sys.process.{ProcessIO, Process}
 import sys.process._
-import java.io.File
+//import java.io.File
 import com.typesafe.scalalogging.slf4j.Logging
 import scala.None
-import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.pageimages
+import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.{pageimages, pagexmls}
 import edu.umass.cs.iesl.scalacommons.Workspace
 import net.liftweb.http.S
+import scala.reflect.io.Directory
+import edu.umass.cs.iesl.pdf2meta.webapp.lib.MetataggerXmlLogic.PageXml
 
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 
-import tools.nsc.io.File
+//import tools.nsc.io.File
+
+import scala.tools.nsc.io.File
 /**
  * Created by klimzaporojets on 6/5/14.
  * Invokes psToText on a particular pdf file
@@ -62,7 +66,11 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
       props.addOrReplaceValue(propertiesFilename,"ispdfalreadyparsed","true")
   }
 
-
+  val outfiles: Map[String, PageXml] =
+  {
+    Map("metatagger" -> new PageXml("metatagger", File(outFileRunCrf)))
+  }
+  pagexmls.set(outfiles)
 }
 
 class PsToTextConversionException(s: String) extends Exception(s)

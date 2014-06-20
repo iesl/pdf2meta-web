@@ -5,6 +5,7 @@ import java.io.InputStream
 import net.liftweb.common.{Empty, Box}
 import edu.umass.cs.iesl.pdf2meta.webapp.lib.PageImage
 import edu.umass.cs.iesl.pdf2meta.cli.layoutmodel.DocNode
+import edu.umass.cs.iesl.pdf2meta.webapp.lib.MetataggerXmlLogic.PageXml
 
 
 object filestreamBox extends SessionVar[Box[InputStream]](Empty);
@@ -12,6 +13,8 @@ object filestreamBox extends SessionVar[Box[InputStream]](Empty);
 object filenameBox extends SessionVar[Box[String]](Empty);
 
 object pageimages extends SessionVar[Map[Int, PageImage]](null);
+
+object pagexmls extends SessionVar[Map[String, PageXml]](null);
 
 object ReadingOrderPair
   {

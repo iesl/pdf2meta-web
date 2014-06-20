@@ -156,11 +156,14 @@ trait ShowMetataggerComponent
 				result
 				}
 
+      val xmlmetatagger = pagexmls.get("metatagger").xmlUrl
 
 			val res = bind("ul", in, "file_name" -> filename,
 			     // "mime_type" -> mimetype, // Text(v.mimeType)),
 			     "length" -> length, //"md5" -> md5str,
-			     "pdfinfo" -> bindPdfInfo _)
+			     "pdfinfo" -> bindPdfInfo _,
+           "xmlmetatagger" -> xmlmetatagger)
+
 
         S.set("state","uploading")
         S.set("message","99%: binding the content")

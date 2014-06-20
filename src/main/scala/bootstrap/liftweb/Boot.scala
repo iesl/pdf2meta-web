@@ -2,7 +2,7 @@ package bootstrap.liftweb
 
 import net.liftweb._
 import common._
-import edu.umass.cs.iesl.pdf2meta.webapp.lib.ImageLogic
+import edu.umass.cs.iesl.pdf2meta.webapp.lib.{MetataggerXmlLogic, ImageLogic}
 import edu.umass.cs.iesl.pdf2meta.webapp.cakesnippet.{ShowMetataggerComponent, ShowPdfComponent}
 import edu.umass.cs.iesl.pdf2meta.cli.WebPipelineComponent
 import http._
@@ -77,6 +77,7 @@ class Boot {
 
     LiftRules.dispatch.append(ImageLogic.matcher)
 
+    LiftRules.dispatch.append(MetataggerXmlLogic.matcher)
 
     val entries =
         Menu(Loc("uploadprogress", List("uploadprogress"), "Upload Progress")) ::
