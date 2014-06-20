@@ -19,6 +19,10 @@ import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 class MetataggerExamples(implicit val bindingModule:BindingModule) extends Injectable
  {
 
+  S.set("state","uploading")
+  S.set("message","0%: upload not initialized")
+  S.set("percentage","0")
+
   val exampleDirPath = inject[String]('examples)
 //  println("The path that fails is: " + exampleDirPath)
   val exampleDir = Directory(exampleDirPath)

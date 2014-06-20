@@ -11,6 +11,8 @@ import edu.umass.cs.iesl.pdf2meta.cli.coarsesegmenter.{PerceptronCoarseSegmenter
 import edu.umass.cs.iesl.pdf2meta.cli.segmentsmoother.BestCoarseLabelModelAligner
 import edu.umass.cs.iesl.pdf2meta.cli.config.{StandardCoarseLabelModel, StandardScoringModel}
 import edu.umass.cs.iesl.pdf2meta.cli.extract.metatagger.{MetataggerBoxExtractor, MetataggerProcessor}
+import net.liftmodules.widgets
+import net.liftweb.sitemap.{SiteMap, Loc, Menu}
 
 //import org.scala_tools.subcut.inject.NewBindingModule
 import com.escalatesoft.subcut.inject.NewBindingModule
@@ -21,6 +23,14 @@ import edu.umass.cs.iesl.pdf2meta.webapp.snippet.{MetataggerExamples, PdfExample
 import edu.umass.cs.iesl.pdf2meta.cli.extract.pdfbox.{SpaceEstimator, PdfBoxExtractor}
 import edu.umass.cs.iesl.pdf2meta.cli.pagetransform._
 import edu.umass.cs.iesl.pdf2meta.cli.extract.PdfMinerExtractor
+
+//import widgets.menu.MenuWidget
+import edu.umass.cs.iesl.pdf2meta.webapp.ajax.UploadProgress
+
+
+import edu.umass.cs.iesl.pdf2meta.webapp.snippet.UploadProgressDemo
+
+//import _root_.webapptest.snippet.UploadProgressDemo
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -35,6 +45,7 @@ class Boot {
     //   LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))
     // where to search snippet
     LiftRules.addToPackages("edu.umass.cs.iesl.pdf2meta.webapp")
+
 
     LiftRules.snippets.append({
       case List("showpdf") => new WiredApp.ShowPdf()
@@ -51,6 +62,8 @@ class Boot {
       case List("pdfexamplesmetatagger") => new MetataggerExamples().render
     }) // ensure that the subcut config is passed
 
+
+
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
@@ -63,6 +76,19 @@ class Boot {
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
     LiftRules.dispatch.append(ImageLogic.matcher)
+
+
+    val entries =
+        Menu(Loc("uploadprogress", List("uploadprogress"), "Upload Progress")) ::
+        Nil
+
+//    LiftRules.setSiteMap(SiteMap(entries:_*))
+
+    UploadProgress.init
+
+    LiftRules.snippetDispatch.append(
+      Map("UploadExample" -> UploadProgressDemo)
+    )
   }
 }
 
