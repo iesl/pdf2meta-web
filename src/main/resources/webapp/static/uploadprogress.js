@@ -61,10 +61,19 @@
   });
   
   return this.each(function(){
+
+//      $("body").find("a").mousedown(function(){ alert("mouse down on a"); return true; });
+      $("body").find("a").click(function(){                   
+                  options.start();
+                  var uploadProgress = $.browser.safari ? progressFrame.jQuery.uploadProgress : jQuery.uploadProgress;
+                  options.timer = window.setInterval(function() { uploadProgress(this, options) }, options.interval);
+                  uploadFile(); });
+      
       for(i=0; i<this.elements.length; i++){
+        //alert(this.elements[i]);
         if(this.elements[i].type=="file")
           {
-            //alert("file element again ")
+            //alert("file element again ");
             //document.getElementById("form1").elements[i].addEventListener('onchange', function(){ alert('blah');}, false);
             this.elements[i].onchange = function() {
                   /* start callback */

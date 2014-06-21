@@ -70,8 +70,6 @@ trait ShowMetataggerComponent
 //      val w_xml = new StreamWorkspace("output_pstotext_runcrf_v3.xml", new FileInputStream("/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/output_pstotext_runcrf_v3.xml"))
 
 
-
-
       val length: Box[Text] = Full(Text(wNewStructure.file.length.toString /*w.file.length.toString*/))
 
 			val filename: Box[Text] = Full(Text(wNewStructure.file.name.toString /*w.filename*/))
@@ -337,7 +335,7 @@ trait ShowMetataggerComponent
           }
           else
           {
-            tokenizedText
+            "<strong>" + tokenizedText + "</strong>"
           }
 
         }
