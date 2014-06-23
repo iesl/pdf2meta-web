@@ -75,9 +75,6 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
 
       val modifiedProperties:Map[String,String] = propertiesMapper.readPropertiesFile(mainPropertiesLocation)
 
-//      println(modifiedProperties.get("pdflocation").get)
-//      println(modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/")))
-
       (File(modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/"))).createDirectory(),
             File(modifiedProperties.get("pdflocation").get))
     }

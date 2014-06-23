@@ -77,7 +77,6 @@ object UploadProgress {
 //        "percentage" -> Str(math.floor(((recived) / (size))*100).toString)
 //      )
 //    ))
-    println("inside the progressJsonResponse" )
     Full(JsonResponse(
       JsObj(
         "state" -> S.get("state").openOrThrowException("no state found"), //"uploading",

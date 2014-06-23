@@ -24,7 +24,6 @@ class MetataggerExamples(implicit val bindingModule:BindingModule) extends Injec
   S.set("percentage","1")
 
   val exampleDirPath = inject[String]('examples)
-//  println("The path that fails is: " + exampleDirPath)
   val exampleDir = Directory(exampleDirPath)
   //val exampleDir = Directory(System.getProperty("pdf2metaExamples")) //"/Users/lorax/iesl/pdf2meta/ReadingOrderCases") //Directory("/Users/lorax/iesl/bibmogrify-project/pdf2meta-web/examplePDFs") //
 
@@ -33,13 +32,11 @@ class MetataggerExamples(implicit val bindingModule:BindingModule) extends Injec
     // reread these on every render, to allow changing files while the server is runng
     val examples = exampleDir.files.toSeq.filter(x => !x.name.startsWith(".") && x.name.contains(".pdf"))
 
-//    println("examples: " + examples)
     def bindExamples(template: NodeSeq): NodeSeq = {
       examples.flatMap {
         example => {
           bind("ex", template, "url" -> {
             val ename = example.name
-//            println ("example name: " + ename)
             S.fmapFunc(() => showExample(example)) {
               linkName => {
                 val linkUrl = "pdfexamplesmetatagger?" + linkName + "=_"

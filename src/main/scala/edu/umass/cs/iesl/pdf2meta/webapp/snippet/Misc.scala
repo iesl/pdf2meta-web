@@ -85,7 +85,6 @@ class Uploadertometatagger
 
       if (v.mimeType != "application/pdf")
       {
-        println ("The following is the mimeType: " + v.mimeType)
         S.error("Not a PDF file")
       }
 
