@@ -45,11 +45,12 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
     {
 
       if((properties.get("pdflocation")!=None && properties.get("pdflocation").get.trim!="" &&
-        linuxCommandExecuter.runCommand("diff " + properties.get("pdflocation").get +
-          " " + d + File.separator + filename).trim!=""))
+        linuxCommandExecuter.runCommand(List("diff", properties.get("pdflocation").get,d + File.separator + filename)/*"diff " + properties.get("pdflocation").get +
+          " " + d + File.separator + filename*/).trim!=""))
       {
-        linuxCommandExecuter.runCommand("cp " + d + File.separator + filename + " " +
-                properties.get("pdflocation").get)
+        linuxCommandExecuter.runCommand(List("cp ", d + File.separator + filename,
+              properties.get("pdflocation").get)/*"cp " + d + File.separator + filename + " " +
+                properties.get("pdflocation").get + ""*/)
         propertiesMapper.savePropertiesValues(mainPropertiesLocation,
                                       Map("pdflocation" -> properties.get("pdflocation").get,
                                           "ispdfalreadyparsed" -> "false" ))
@@ -58,14 +59,15 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
       else if(properties.get("pdflocation")==None ||
                     properties.get("pdflocation").get.trim=="")
       {
-        val pdfDir = inject[String]('data_path) + File.separator + getOnlyFileName(filename)
+        val pdfDir = inject[String]('data_path) + File.separator + getOnlyFileName(filename).replaceAll(" ", "_")
 
         File(pdfDir).createDirectory(force=true)
 
-        linuxCommandExecuter.runCommand("cp " + d + File.separator + filename + " " +
-          pdfDir + File.separator)
+        linuxCommandExecuter.runCommand(List("cp", d + File.separator + filename,
+           (pdfDir + File.separator + filename.replaceAll(" ","_")))/*"cp " + d + File.separator + filename + " " +
+          pdfDir + File.separator + ""*/)
         propertiesMapper.savePropertiesValues(mainPropertiesLocation,
-          Map("pdflocation" -> (pdfDir + File.separator + filename),
+          Map("pdflocation" -> (pdfDir + File.separator + filename.replaceAll(" ","_")),
             "ispdfalreadyparsed" -> "false" ))
       }
       else

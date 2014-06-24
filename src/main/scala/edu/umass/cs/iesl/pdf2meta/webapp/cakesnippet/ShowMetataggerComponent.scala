@@ -450,10 +450,10 @@ trait ShowMetataggerComponent
           val truncatedText: String =
           {
             val t: String = x.node.text.trim
-            val s = t.substring(0, t.length.min(1000))
+            val s = t.substring(0, t.length.min(100000))
             s.length match
             {
-              case 1000 => s + " ..."
+              case 100000 => s + " ..."
               case 0   => "EMPTY"
               case _   => s
             }
@@ -462,7 +462,7 @@ trait ShowMetataggerComponent
 
           val testText:String = "<font>" + truncatedText + "</font>"
 
-
+          println("about to load: " + testText);
           val brokenText:NodeSeq =  XML.loadString(testText) // testTextList.map(x=> {<font>{x}<br></br></font>}) //{<font>just test</font>} //breakText(truncatedText.split(" ").toList, List(), 0, 0, 60)
 
           bind("sidelabel", segmentTemplate, "text" ->

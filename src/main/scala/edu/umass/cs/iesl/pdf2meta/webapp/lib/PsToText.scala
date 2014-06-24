@@ -27,9 +27,9 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
     S.get("propertiesFile").openOrThrowException("err while obtaining properties file")
 
   val properties:Map[String,String] = props.readPropertiesFile(propertiesFilename)
-  val outFilenameRunCrf = w.filename + "_runcrf.xml";
+  val outFilenameRunCrf = w.file.name + "_runcrf.xml";
   val filePath = w.dir.path //inject[String]('pstotext_path)
-  val outFileRunCrf = filePath + "/" + w.filename + "_runcrf.xml";
+  val outFileRunCrf = filePath + "/" + w.file.name + "_runcrf.xml";
 
   if(properties.get("ispdfalreadyparsed").get=="false")
   {
@@ -37,7 +37,7 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
     S.set("message","20%: running pstotext")
     S.set("percentage","20")
 
-    val outFilePsToText = filePath + "/" + w.filename + ".xml";
+    val outFilePsToText = filePath + "/" + w.file.name + ".xml";
 
     val convertPath:String = inject[String]('pstotext)
 
@@ -46,12 +46,13 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
     //check if the pdf file exists already and if it is the same using diff command
 
       val output = {
-        val result = (convertPath + " " + w.file).toString #> new java.io.File(outFilePsToText) !
-
+        //' used in case the file name has spaces
+        val result:Int = List(convertPath, w.file.toString()) /*(convertPath + " '" + w.file + "'").toString*/ #> new java.io.File(outFilePsToText) !
+//sometimes despite the result is !=0, the output is ok
         if (result != 0) {
           throw new PdfConversionException("Error while executing pstotext")
         }
-        result
+        //result
       }
       val f = new java.io.File(outFilePsToText)
       if (!f.exists) {

@@ -48,12 +48,12 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
       S.set("message","60%: converting pdf to jpg")
       S.set("percentage","60")
 
-      val outfilebase = w.dir + "/" + w.filename + ".jpg";
+      val outfilebase = w.dir + "/" + w.file.name + ".jpg";
 
       //gets the dimension of pdf first page, assuming that the rest of the pages have the same size
 
       val identifyPath = inject[String]('identify)
-      val commandIdentify = identifyPath + " " + w.file
+      val commandIdentify:List[String] = List(identifyPath, w.file.toString()) //identifyPath + " " + w.file
 
       val outputIdentify = linuxCommandExecuter.runCommand(commandIdentify)
 
@@ -83,7 +83,8 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
       props.addOrReplaceValue(propertiesFilename,"imagedir",w.dir.path)
 
       val convertPath = inject[String]('convert)
-      val command = convertPath + " -density 400 -verbose " + w.file + " " + outfilebase
+      val command = List(convertPath, "-density", "400", "-verbose", w.file.toString(), outfilebase.toString)
+      //convertPath + " -density 400 -verbose " + w.file + " " + outfilebase
 
 
       val output = linuxCommandExecuter.runCommand(command)
