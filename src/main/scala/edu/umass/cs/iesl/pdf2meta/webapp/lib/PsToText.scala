@@ -47,12 +47,19 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 
       val output = {
         //' used in case the file name has spaces
-        val result:Int = List(convertPath, w.file.toString()) /*(convertPath + " '" + w.file + "'").toString*/ #> new java.io.File(outFilePsToText) !
-//sometimes despite the result is !=0, the output is ok
+//        val result:Int = /*List(convertPath, w.file.toString())*/ (convertPath + " '" + w.file + "'").toString #> new java.io.File(outFilePsToText) !
+//        // /*(convertPath + " '" + w.file + "'").toString*/
+////sometimes despite the result is !=0, the output is ok
+//        if (result != 0) {
+//          throw new PdfConversionException("Error while executing pstotext")
+//        }
+//        result
+        val result = (convertPath + " " + w.file).toString #> new java.io.File(outFilePsToText) !
+
         if (result != 0) {
           throw new PdfConversionException("Error while executing pstotext")
         }
-        //result
+        result
       }
       val f = new java.io.File(outFilePsToText)
       if (!f.exists) {
