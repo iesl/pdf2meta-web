@@ -1,0 +1,11 @@
+#examples=/Users/klimzaporojets/klim/pdf2meta/pdf2meta-web/examples/
+examples=./examples
+convert=convert
+identify=identify
+pstotext_path=../pstotext
+#where the properties files are being generated
+properties_path=../pstotext
+#where the data (images, xml, pdf files...) is being stored
+data_path=../pstotext/data
+pstotext=pstotext
+runcrf_path=../rexa1-metatagger
