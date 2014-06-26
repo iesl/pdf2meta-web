@@ -1,0 +1,266 @@
+<!--<html xmlns="http://www.w3.org/1999/xhtml" xmlns:lift="http://liftweb.net/">-->
+<html>
+<head>
+  
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+  <meta name="description" content="nioqui"/>
+  <meta name="keywords" content=""/>
+
+  <title>Pdf2Meta Visualizer : 0.1-SNAPSHOT</title>
+
+  <link type="text/css" media="screen, projection" rel="stylesheet" href="/static/blueprint/screen.css"/>
+  <link type="text/css" media="print" rel="stylesheet" href="/static/blueprint/print.css"/>
+
+
+
+  <link type="text/css" media="screen, projection" rel="stylesheet"
+        href="/static/blueprint/plugins/fancy-type/screen.css"/>
+
+  <script id="jquery" src="/classpath/jquery.js" type="text/javascript"> </script>
+  <script id="json" src="/classpath/json.js" type="text/javascript"/> </script>
+  <script id="util" src="/static/util.js" type="text/javascript"/> </script>
+  <script id="tooltip" src="/static/tooltip.js" type="text/javascript"/> </script>
+
+  <link rel="stylesheet" type="text/css" src="/static/tooltip.css" />
+  <style type="text/css">
+    .edit_error_class {
+      display: block;
+      color: red;
+    }
+
+    .sidebar ul {
+      margin: 0;
+      padding: 0;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .sidebar ul li {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border: 1px solid #ccc;
+      border-bottom: none;
+    }
+
+    .sidebar ul li a {
+      display: block;
+      padding: 3px;
+      text-indent: 30px;
+      text-decoration: none;
+    }
+
+    .sidebar ul li span {
+      display: block;
+      padding: 3px;
+      text-indent: 30px;
+      text-decoration: none;
+    }
+
+    .sidebar ul li a:hover {
+      background-color: #eee;
+    }
+
+    .line {
+      position: absolute;
+      height: 0px;
+      border-width: 2px 0px 0px 0px;
+      border-style: solid;
+      border-color: red;
+    }
+
+    .line:hover {
+      border-color: red;
+    }
+    
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="column span-24 last" style="text-align: center">
+    <h1 class="alt">Pdf2Meta Segmentation Visualizer<img alt="" id="ajax-loader"
+                                                    style="display:none; margin-bottom: 0px; margin-left: 5px"
+                                                    src="/images/ajax-loader.gif"/></h1>
+  </div>
+
+
+  <div class="column span-24 last">
+    <div>
+    <script type="text/javascript">
+            var chosen = "";
+    </script>
+    <lift:showmetatagger>
+
+        <p>
+          <a href="/pdfexamplesmetatagger"><strong>&lt;&lt;&nbsp;CHOOSE ANOTHER PDF</strong></a>
+        </p>
+        <p>&nbsp;</p>
+        <p>
+            File name:
+            <ul:file_name></ul:file_name>
+        </p>
+
+        <!--MIME Type:
+             <ul:mime_type></ul:mime_type>
+             <br/>-->
+        <p> File length:
+            <ul:length></ul:length>
+        </p>
+
+        <p> 
+            <ul:xmlmetatagger></ul:xmlmetatagger>
+        </p>
+
+        <!--MD5 Hash:
+             <ul:md5></ul:md5>
+             <br/>-->
+        <ul:pdfinfo>
+            <!--<p>
+                <pdfinfo:filename></pdfinfo:filename>
+            </p>-->
+
+            <p>
+
+            </p>
+            <p>&nbsp;</p>
+            <pdfinfo:pages>
+
+                <div class="span-24">
+                    <div class="span-1"/> 
+                    <div id="images" class="span-9">
+                        <center><div class="alt2"> <page:pagenumber/> </div></center>
+
+                        <!--</page:pagenumber>-->
+                        <div page:id="main" page:style="">
+                            <div id="img" style="position: absolute; top:0; left:0">
+                                <page:image/>
+                            </div>
+                            <page:textboxes>
+                                <div textbox:class=""
+                                     textbox:style="border: green 2px hidden;"
+
+                                     onmouseover="if(chosen!=this.classList[0]){partners=getElementsByClass(this.classList[0],document,
+								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+								     .border='green 2px solid';}} document.getElementById(this.classList[0]).style.display = 'block'; document.getElementById(this.classList[0]).style.visibility = 'visible'; return true" onclick=" if(chosen &amp;&amp; chosen!=''){partners=getElementsByClass(chosen); if(partners){for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                     .border='hidden';} document.getElementById(chosen).style.display = 'none';}};  if(chosen!=this.classList[0]){partners=getElementsByClass(this.classList[0],document,
+                                     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                     .border='blue 2px solid';}}; document.getElementById(this.classList[0]).style.display = 'block'; if(chosen &amp;&amp; chosen == this.classList[0]) {chosen = '';partners=getElementsByClass(this.classList[0],document,
+                                     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                     .border='green 2px solid';}}else{chosen=this.classList[0];}; return true"
+
+                                     onmouseout="if(chosen != this.classList[0]){partners=getElementsByClass(this.classList[0],document,
+								     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+								     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none';}else{partners=getElementsByClass(this.classList[0],document,
+                                     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                     .border='blue 2px solid';}} return true">
+                                    <!--onmouseover="this.style.border='red 2px solid'; return true"
+                                                                                  onmouseout="this.style.border='green 2px
+                                                                                  solid'; return true">-->
+                                    &nbsp;
+                                </div>
+                            </page:textboxes>
+
+                            <!--kzaporojets: side labels (derived from segments)-->
+                        <page:externallabels> 
+                            <div externallabel:id="" externallabel:style="border: medium hidden;">
+                                <externallabel:sidelabels>
+                                    <div sidelabel:class="span-9 last" sidelabel:style="border: medium hidden; "
+                                         onmouseover="elems=getElementsByClass(this.classList[0].match(/REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)/gi),document,'div'); if(elems &amp;&amp; elems.length>0){elems[0].style
+                                         .border='hidden'}; partners=getElementsByClass(this.classList[0],document,
+                                         'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block'; 
+                                          return true"
+                                         onmouseout="elems=getElementsByClass(this.classList[0].match(/REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+)/gi),document,'div'); if(elems &amp;&amp; elems.length>0){elems[0].style
+                                         .border='blue 2px solid'};partners=getElementsByClass(this.classList[0],document,
+                                         'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+                                         .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
+                                        <div class="span-7 last top " style="margin-left: 4px;margin-top: 4px;">
+                                            <sidelabel:text/>
+                                        </div>
+                                    </div>
+                                </externallabel:sidelabels>
+                            </div>
+                        </page:externallabels>
+                            <!--kzaporojets: end side labels -->
+
+                            <page:delimitingboxes>
+                                <div rectbox:class="" rectbox:style="border: blue 2px solid;">&nbsp;</div>
+                            </page:delimitingboxes>
+                            <page:discardboxes>
+                                <div rectbox:class="discardrev"
+                                     rectbox:style="background-color: white; opacity: 0.8; visibility: visible;">
+                                    &nbsp;</div>
+                            </page:discardboxes>
+                            <page:whitespaceboxes>
+                                <div rectbox:class="whitespacerev"
+                                     rectbox:style="border: orange 2px solid; "> <!--display: none; -->
+                                    &nbsp;</div>
+                            </page:whitespaceboxes>
+                            <page:readingorder/>
+                        </div>
+                    </div>
+                    <div class="span-9">
+
+
+                        <page:segments>
+                            <div segment:class="span-9 last" style="border: green 2px hidden;"
+                                 onmouseover="partners=getElementsByClass(this.classList[0],document,
+							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style.border='green 2px solid';} document.getElementById(this.classList[0]).style.display = 'block';
+							      return true"
+                                 onmouseout="partners=getElementsByClass(this.classList[0],document,
+							     'div'); for (i = 0; i &lt; partners.length; i++) {partners[i].style
+							     .border='hidden';} document.getElementById(this.classList[0]).style.display = 'none'; return true">
+
+
+                                <div class="span-7 last top">
+                                    <segment:text/>
+                                </div>
+                            </div>
+                        </page:segments>
+                    </div>
+                    <div class="span-5 last">
+                        <page:features>
+                            <div features:id="" class="span-5 last" style="border: green 2px solid; display: none">
+                                <span class="bold">Labels</span>
+                                <table>
+                                    <features:scores>
+                                        <tr>
+                                            <td>
+                                                <pair:a/>
+                                            </td>
+                                            <td>
+                                                <pair:b/>
+                                            </td>
+                                        </tr>
+                                    </features:scores>
+                                </table>
+                                <hr/>
+                                <span class="bold">Features</span>
+                                <table>
+                                    <features:features>
+                                        <tr>
+                                            <td>
+                                                <pair:a/>
+                                            </td>
+                                            <td>
+                                                <pair:b/>
+                                            </td>
+                                        </tr>
+                                    </features:features>
+                                </table>
+                            </div>
+                        </page:features>
+                    </div>
+                </div>
+            </pdfinfo:pages>
+
+        </ul:pdfinfo>
+        <br/>
+
+    </lift:showmetatagger>
+
+    </div>
+  </div>
+
+
+</div>
+</body>
+</html>

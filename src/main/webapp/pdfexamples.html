@@ -85,7 +85,28 @@
 
 	<div class="column span-24 last">
 		<div>
-		<lift:bind name="content"/>
+	<p>
+		<lift:snippet type="uploader:upload" form="post" multipart="true">
+			<choose:post>
+				Should redirect
+			</choose:post>
+
+			<choose:get>
+				Select a PDF file to upload:
+				<ul:file_upload></ul:file_upload>
+				<br/>
+				<input type="submit" value="Upload File"/>
+			</choose:get>
+
+		</lift:snippet>
+	</p>
+
+				<lift:pdfexamples>
+				<p>Or view one of <examples:count/> existing examples:</p>
+					<examples:example>
+						<p><ex:url/></p>
+					</examples:example>
+				</lift:pdfexamples>
 		</div>
 	</div>
 
@@ -93,3 +114,5 @@
 </div>
 </body>
 </html>
+
+
