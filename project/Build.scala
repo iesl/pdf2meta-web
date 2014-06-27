@@ -19,8 +19,11 @@ object Pdf2MetaWebBuild extends Build {
     liftWizard(),
     scalatest(),
     classutil(),
-    jetty("6.1.26"),
-    jettyContainer("6.1.26"),
+    "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided",
+    "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115" % "container",
+    "org.eclipse.jetty" % "jetty-plus"   % "9.1.0.v20131115" % "container",
+    //jetty("6.1.26"),
+    // jettyContainer("6.1.26"),
     "com.escalatesoft.subcut" %% "subcut" % "2.0",
     "com.typesafe" % "config" % "1.2.1",
     "net.liftmodules" %% "widgets_2.6" % "1.3"
@@ -29,22 +32,10 @@ object Pdf2MetaWebBuild extends Build {
   lazy val pdf2meta = ProjectRef(new java.io.File("../pdf2meta"), "pdf2meta")
 
   lazy val pdf2metaWeb = Project("pdf2meta-web", new java.io.File("."))
-    .ieslSetup(vers, deps, Public,WithSnapshotDependencies,"edu.umass.cs.iesl")
+    .ieslSetup(vers, deps, Public, WithSnapshotDependencies,"edu.umass.cs.iesl")
     .cleanLogging.standardLogging
     .settings(WebPlugin.webSettings :_*)
     .dependsOn(pdf2meta)
-
-  /*   .settings((resourceGenerators in Compile <+= (resourceManaged, baseDirectory) map
-     { (managedBase, base) =>
-       val webappBase = base / "src" / "main" / "webapp"
-       for {
-         (from, to) <- webappBase ** "*" x rebase(webappBase, managedBase /
-           "main" / "webapp")
-       } yield {
-         Sync.copy(from, to)
-         to
-       }
-     }))*/
 
 }
 

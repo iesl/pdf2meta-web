@@ -9,5 +9,5 @@
 -J-XX:+CMSClassUnloadingEnabled
 -J-XX:+UseCodeCacheFlushing
 
--J-DlocalModules=net.openreview:openreview-model=/home/saunders/projects/the-livingroom/openreview-workspace/openreview-model:openreview-model
+-J-DlocalModules=edu.umass.cs.iesl:pdf2meta=../pdf2meta
 

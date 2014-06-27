@@ -54,6 +54,7 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 //          throw new PdfConversionException("Error while executing pstotext")
 //        }
 //        result
+        println(s"""running ${convertPath} + ${w.file}).toString #> new java.io.File(${outFilePsToText})""")
         val result = (convertPath + " " + w.file).toString #> new java.io.File(outFilePsToText) !
 
         if (result != 0) {
@@ -69,6 +70,7 @@ class PsToText(w: Workspace)(implicit val bindingModule: BindingModule) extends 
       S.set("message","40%: running metatagger (may take several minutes)")
       S.set("percentage","40")
 
+    println("running crf metatagger")
       val resRuncrf = (sys.process.Process(Seq("echo", outFilePsToText + " -> " + outFileRunCrf)) #| sys.process.Process("bin/runcrf", new java.io.File(runcrfFilePath))).!!
 
       props.addOrReplaceValue(propertiesFilename,"ispdfalreadyparsed","true")
