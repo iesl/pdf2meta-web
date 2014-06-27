@@ -27,6 +27,8 @@ import net.liftweb.common.Full
 import scala.util.Random
 import scala.reflect.io.File
 
+import scala.xml.Utility._
+
 //import org.scala_tools.subcut.inject.AutoInjectable
 import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
 
@@ -276,7 +278,7 @@ trait ShowMetataggerComponent
           {
             val retVal = breakText(leftTokens,List(),0, /*{if(widthSoFar > largestWidth){widthSoFar}else
                   {largestWidth}},*/ maxWidth)
-            (accumulatedTokens.map(x=> x.toString).mkString(" ") + " \n<br></br> " + retVal._1,
+            (Utility.escape(accumulatedTokens.map(x=> x.toString).mkString(" ")) + " \n<br></br> " + retVal._1,
               {if(widthSoFar > retVal._2){widthSoFar}else{retVal._2}})
           }
           else
@@ -287,7 +289,7 @@ trait ShowMetataggerComponent
         }
         else
         {
-          (accumulatedTokens.map(x=> x.toString).mkString(" "),widthSoFar)
+          (Utility.escape(accumulatedTokens.map(x=> x.toString).mkString(" ")),widthSoFar)
         }
       }
 
@@ -296,8 +298,9 @@ trait ShowMetataggerComponent
         if(rect.size>0)
         {
           val currentRect = rect.head
-          val rectRes:String = "&#160;&#160;&#160;&#160;&#160;<strong>AUTHOR " + number + "</strong> " + currentRect.node.text.replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
+          val rectRes:String = "&#160;&#160;&#160;&#160;&#160;<strong>AUTHOR " + number + "</strong> " + (Utility.escape(currentRect.node.text)).replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
                       .replaceAll("MN:","<strong>MN:</strong>")
+          //TODO:Utility.unescape(rectRes) may be needed to determine the width more accurately
           val textWidth:Int = font.getStringBounds(rectRes.replaceAll("<strong>","").replaceAll("</strong>","").replaceAll("&#160;", " "), frc).getWidth().toInt
           if(rect.size>1)
           {
