@@ -91,18 +91,12 @@ class Boot {
       Map("UploadExample" -> UploadProgressDemo)
     )
 
-    LiftRules.exceptionHandler.prepend {
-      case (runMode, req, exception) =>
-        //logger.error("Failed at: "+req.uri)
-        RedirectResponse("/errorparsing")
-//        val content = S.render(<lift:embed what="500" />, req.request)
-//        XmlResponse(
-//          content.head,
-//          500,
-//          "text/html",
-//          req.cookies)
 
-    }
+//    LiftRules.exceptionHandler.prepend {
+//      case (runMode, req, exception) =>
+//        //logger.error("Failed at: "+req.uri)
+//        RedirectResponse("/errorparsing")
+//    }
 
 
 
