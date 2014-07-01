@@ -345,7 +345,7 @@ trait ShowMetataggerComponent
 
         headL.copy(node = new MetataggerBoxTextAtom(headL.node.id, finalTextWithChildren /*boldenPart(tokenizedText)*/ /*headL.node.text*/ /*.toUpperCase*/, "Font", 0.0f,
           new RectangleOnPage {override val page: Page = headL.node.rectangle.get.page
-            override val bottom: Float = topRel + (20 * finalTextWithChildren.split("\n").length + 5 )
+            override val bottom: Float = topRel + (18 * finalTextWithChildren.split("\n").length + 5 )
             override val top: Float = topRel
             override val left: Float = headL.node.rectangle.get.left
             override val right: Float = headL.node.rectangle.get.left + maxChildrenWidth // maxWidth //headL.node.rectangle.get.right
