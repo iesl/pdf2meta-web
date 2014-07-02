@@ -52,7 +52,16 @@ trait ShowMetataggerComponent
 
   //links the path of the children to the respective prefix of each one (AUTHOR x, INSTITUTION x, etc...)
   val mapPrefixChildren:Map[String, String] = Map("HEADERS -> AUTHORS" -> "AUTHOR",
-        "HEADERS -> INSTITUTION" -> "INSTITUTION")
+        "HEADERS -> INSTITUTION" -> "INSTITUTION",
+        "HEADERS -> ADDRESS" -> "ADDRESS",
+        "HEADERS -> NOTE -> DATE" -> "DATE",
+        "HEADERS -> NOTE -> INSTITUTION" -> "INSTITUTION")
+
+  //list that contains the children whose textbox have to be bound
+  val childrenToBind:Seq[String] = List("HEADERS -> INSTITUTION",
+                                        "HEADERS -> ADDRESS",
+                                        "HEADERS -> NOTE -> DATE",
+                                        "HEADERS -> NOTE -> INSTITUTION")
 
   /*
   *
@@ -476,7 +485,7 @@ trait ShowMetataggerComponent
 
           val testText:String = "<font>" + truncatedText + "</font>"
 
-          println("about to load: " + testText);
+//          println("about to load: " + testText);
           val brokenText:NodeSeq =  XML.loadString(testText) // testTextList.map(x=> {<font>{x}<br></br></font>}) //{<font>just test</font>} //breakText(truncatedText.split(" ").toList, List(), 0, 0, 60)
 
           bind("sidelabel", segmentTemplate, "text" ->
@@ -562,8 +571,21 @@ trait ShowMetataggerComponent
           else
           {
             bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox.node, ns), "style"),
-              FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox.node, ns), "class"))
+              FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox.node, ns), "class")) ++
+           {if(childrenToBind.contains(textbox.node.text)) {
+              textbox.children.flatMap {
+                tbChildren => {
+                  bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(tbChildren.node, ns), "style"),
+                    FuncAttrBindParam("class", (ns: NodeSeq) => addId(textbox.node, ns), "class"))
+                }
+              }
+            }
+            else
+            {
+              List()
+            }}
           }
+
         }
       }
     }
