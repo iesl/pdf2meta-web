@@ -1,0 +1,197 @@
+<!--<html xmlns="http://www.w3.org/1999/xhtml" xmlns:lift="http://liftweb.net/">-->
+<html>
+<head>
+	
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<meta name="description" content="nioqui"/>
+	<meta name="keywords" content=""/>
+
+	<title>Pdf2Meta Visualizer : 0.1-SNAPSHOT</title>
+
+	<link type="text/css" media="screen, projection" rel="stylesheet" href="/static/blueprint/screen.css"/>
+	<link type="text/css" media="print" rel="stylesheet" href="/static/blueprint/print.css"/>
+
+
+
+	<link type="text/css" media="screen, projection" rel="stylesheet"
+	      href="/static/blueprint/plugins/fancy-type/screen.css"/>
+
+	<script id="jquery" src="/classpath/jquery.js" type="text/javascript"> </script>
+	<script id="json" src="/classpath/json.js" type="text/javascript"/> </script>
+	<script id="util" src="/static/util.js" type="text/javascript"/> </script>
+	<script id="tooltip" src="/static/tooltip.js" type="text/javascript"/> </script>
+
+
+    <script id="uploadprogress" type="text/javascript" src="/static/uploadprogress.js"></script>
+
+    <!--<lift:UploadExample.script />-->
+
+    <!--<lift:UploadProgressDemo.script />-->
+
+    <link rel="stylesheet" type="text/css" src="/static/tooltip.css" />
+<script type="text/javascript">
+function uploadFile() {
+
+	document.getElementById("form1").submit();
+}
+</script>
+
+	<style type="text/css">
+		.edit_error_class {
+			display: block;
+			color: red;
+		}
+
+		.sidebar ul {
+			margin: 0;
+			padding: 0;
+			border-bottom: 1px solid #ccc;
+		}
+
+		.sidebar ul li {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			border: 1px solid #ccc;
+			border-bottom: none;
+		}
+
+		.sidebar ul li a {
+			display: block;
+			padding: 3px;
+			text-indent: 30px;
+			text-decoration: none;
+		}
+
+		.sidebar ul li span {
+			display: block;
+			padding: 3px;
+			text-indent: 30px;
+			text-decoration: none;
+		}
+
+		.sidebar ul li a:hover {
+			background-color: #eee;
+		}
+
+		.line {
+			position: absolute;
+			height: 0px;
+			border-width: 2px 0px 0px 0px;
+			border-style: solid;
+			border-color: red;
+		}
+
+		.line:hover {
+			border-color: red;
+		}
+
+        .bar {
+            width: 300px;
+        }
+        #progress {
+            background: #eee;
+            border: 1px solid #222;
+            margin-top: 20px;
+        }
+        #progressbar {
+            width: 0px;
+            height: 24px;
+            background: #333;
+        }
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="column span-24 last" style="text-align: center">
+		<h1 class="alt">Pdf2Meta Segmentation Visualizer<img alt="" id="ajax-loader"
+		                                                style="display:none; margin-bottom: 0px; margin-left: 5px"
+		                                                src="/images/ajax-loader.gif"/></h1>
+	</div>
+
+
+	<div class="column span-24 last">
+		<div>
+	<p>
+		<lift:snippet type="Uploadertometatagger:upload" form="post" multipart="true" id="form1">
+			<choose:post>
+				Should redirect
+			</choose:post>
+
+			<choose:get>
+				Select a PDF file to upload:
+				<ul:file_upload></ul:file_upload>
+				<!--<br/>
+				<input type="submit" value="Upload File"/>-->
+        <div id="uploading">
+            <div id="progress" class="bar">
+                <div id="progressbar">&nbsp;</div>
+                <div id="percents"></div>
+            </div>
+        </div>
+			</choose:get>
+
+		</lift:snippet>
+	</p>
+	<script type="text/javascript">
+for(i=0; i<document.getElementById("form1").elements.length; i++){
+	if(document.getElementById("form1").elements[i].type=="file")
+	{
+		//document.getElementById("form1").elements[i].onchange = function() { uploadFile(); };
+	}
+}
+</script>
+<!--uploadFile(); return true; -->
+				<lift:pdfexamplesmetatagger>
+				<p>Or view one of <examples:count/> existing examples:</p>
+					<examples:example>
+						<p><ex:url/></p>
+					</examples:example>
+				</lift:pdfexamplesmetatagger>
+		</div>
+	</div>
+
+
+</div>
+<lift:snippet type = "UploadProgressDemo:script">
+</lift:snippet>
+
+<!--
+<h2>Upload</h2>
+<p>Choose a file to upload</p>
+
+ <lift:snippet type = "UploadProgressDemo:upload" form="post" multipart="true" id="upload">
+    <choose:post>
+        <p>
+            File name: <ul:file_name/><br />
+            MIME Type: <ul:mime_type/><br />
+            File length: <ul:length/><br />
+            MD5 Hash: <ul:md5/><br />
+        </p>
+    </choose:post>
+
+    <choose:get>
+        Select a PDF file to upload:
+        <ul:file_upload></ul:file_upload>
+        <br/>
+        <input type="submit" value="Upload File"/>
+
+        <div id="uploading">
+            <div id="progress" class="bar">
+                <div id="progressbar">&nbsp;</div>
+                <div id="percents"></div>
+            </div>
+        </div>
+
+    </choose:get>
+
+</lift:snippet>
+
+<lift:snippet type = "UploadProgressDemo:script">
+</lift:snippet>
+-->
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</body>
+</html>
