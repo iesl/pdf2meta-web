@@ -50,7 +50,16 @@ trait ShowMetataggerComponent
                                           "CONTENT -> BIBLIO -> REFERENCE -> AUTHORS -> AUTHOR -> AUTHOR-LAST",
                                           "CONTENT -> BIBLIO -> REFERENCE -> AUTHORS -> AUTHOR -> AUTHOR-MIDDLE")
 
+  //links the path of the children to the respective prefix of each one (AUTHOR x, INSTITUTION x, etc...)
+  val mapPrefixChildren:Map[String, String] = Map("HEADERS -> AUTHORS" -> "AUTHOR",
+        "HEADERS -> INSTITUTION" -> "INSTITUTION")
 
+  /*
+  *
+    val mapAcceptedLabels:Map[String, String] = Map("CONTENT -> HEADERS -> TITLE" -> "HEADERS -> TITLE",
+    "CONTENT -> HEADERS -> AUTHORS" -> "HEADERS -> AUTHORS",
+    "CONTENT -> HEADERS -> INSTITUTION" -> "HEADERS -> INSTITUTION",
+  * */
 
 	class ShowMetatagger(implicit val bindingModule:BindingModule) extends (NodeSeq => NodeSeq) with Injectable
 		{
@@ -293,18 +302,21 @@ trait ShowMetataggerComponent
         }
       }
 
-      def addTextChildren(rect:Seq[ClassifiedRectangle], number:Int, widthSoFar:Int):(String, Int) =
+      def addTextChildren(rect:Seq[ClassifiedRectangle], number:Int, widthSoFar:Int, pathParent:String):(String, Int) =
       {
         if(rect.size>0)
         {
           val currentRect = rect.head
-          val rectRes:String = "&#160;&#160;&#160;&#160;&#160;<strong>AUTHOR " + number + "</strong> " + (Utility.escape(currentRect.node.text)).replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
+          val childName = mapPrefixChildren.get(pathParent)
+
+          val rectRes:String = "&#160;&#160;&#160;&#160;&#160;<strong>" +
+            {if(!childName.isEmpty){childName.get}else{childName}} + " " + number + ":</strong> " + (Utility.escape(currentRect.node.text)).replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
                       .replaceAll("MN:","<strong>MN:</strong>")
           //TODO:Utility.unescape(rectRes) may be needed to determine the width more accurately
           val textWidth:Int = font.getStringBounds(rectRes.replaceAll("<strong>","").replaceAll("</strong>","").replaceAll("&#160;", " "), frc).getWidth().toInt
           if(rect.size>1)
           {
-            val tchil = addTextChildren(rect.tail,number+1,{if(textWidth>widthSoFar){textWidth}else{widthSoFar}})
+            val tchil = addTextChildren(rect.tail,number+1,{if(textWidth>widthSoFar){textWidth}else{widthSoFar}}, pathParent)
             ("\n<br></br>" + rectRes + tchil._1, {if(textWidth>widthSoFar && textWidth>tchil._2){textWidth}else if(widthSoFar>tchil._2){widthSoFar} else{tchil._2}})
           }
           else
@@ -327,7 +339,7 @@ trait ShowMetataggerComponent
 
 
 
-        val (childrenText:String, maxChildrenWidth:Int) = addTextChildren(headL.children,1,maxWidth)
+        val (childrenText:String, maxChildrenWidth:Int) = addTextChildren(headL.children,1,maxWidth, headL.node.text)
         //the children text is added
 
         def boldenPart(tokenizedText:String):String = {
