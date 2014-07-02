@@ -36,7 +36,7 @@ object MetataggerXmlLogic {
   }
   def serveXml(xml: PageXml, req: Req): Box[LiftResponse] =
   {
-    Full(InMemoryResponse(xml.bytes, List("Last-Modified" -> xml.date, "Content-Type" -> "text/plain", "Content-Length" -> xml.length), Nil /*cookies*/ , 200))
+    Full(InMemoryResponse(xml.bytes, List("Last-Modified" -> xml.date, "Content-Type" -> "text/xml"/*"text/plain"*/, "Content-Length" -> xml.length), Nil /*cookies*/ , 200))
   }
 
 

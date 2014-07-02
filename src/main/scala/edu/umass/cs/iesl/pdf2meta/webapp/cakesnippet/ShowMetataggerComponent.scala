@@ -339,7 +339,6 @@ trait ShowMetataggerComponent
           {
             "<strong>" + tokenizedText + "</strong>"
           }
-
         }
         val finalTextWithChildren = boldenPart(tokenizedText) + childrenText
 
