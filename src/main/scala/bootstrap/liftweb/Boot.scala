@@ -92,11 +92,11 @@ class Boot {
     )
 
 
-//    LiftRules.exceptionHandler.prepend {
-//      case (runMode, req, exception) =>
-//        //logger.error("Failed at: "+req.uri)
-//        RedirectResponse("/errorparsing")
-//    }
+    LiftRules.exceptionHandler.prepend {
+      case (runMode, req, exception) =>
+        //logger.error("Failed at: "+req.uri)
+        RedirectResponse("/errorparsing")
+    }
 
 
 
