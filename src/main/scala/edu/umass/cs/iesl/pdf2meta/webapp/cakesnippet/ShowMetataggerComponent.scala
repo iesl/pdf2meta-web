@@ -55,13 +55,19 @@ trait ShowMetataggerComponent
         "HEADERS -> INSTITUTION" -> "INSTITUTION",
         "HEADERS -> ADDRESS" -> "ADDRESS",
         "HEADERS -> NOTE -> DATE" -> "DATE",
-        "HEADERS -> NOTE -> INSTITUTION" -> "INSTITUTION")
+        "HEADERS -> NOTE -> INSTITUTION" -> "INSTITUTION",
+        "HEADERS -> NOTE -> ADDRESS" -> "ADDRESS",
+        "HEADERS -> EMAIL" -> "EMAIL")
 
   //list that contains the children whose textbox have to be bound
   val childrenToBind:Seq[String] = List("HEADERS -> INSTITUTION",
-                                        "HEADERS -> ADDRESS",
+                                        "HEADERS -> ADDRESS"
+    ,
                                         "HEADERS -> NOTE -> DATE",
-                                        "HEADERS -> NOTE -> INSTITUTION")
+                                        "HEADERS -> NOTE -> INSTITUTION",
+                                        "HEADERS -> NOTE -> ADDRESS", "HEADERS -> EMAIL"
+                                        //
+                                        )
 
   /*
   *
@@ -318,11 +324,28 @@ trait ShowMetataggerComponent
           val currentRect = rect.head
           val childName = mapPrefixChildren.get(pathParent)
 
+          val (brokenLines:String, maxWidth:Int) = breakText((currentRect.node.text).split(" ").toList,
+          List(), 0, 350)
+          /*breakText(headL.node.text.split(" ").toList, List(),
+                                                      0, /* largestWidth:Int, */ 400)*/
+
+
           val rectRes:String = "&#160;&#160;&#160;&#160;&#160;<strong>" +
-            {if(!childName.isEmpty){childName.get}else{childName}} + " " + number + ":</strong> " + (Utility.escape(currentRect.node.text)).replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
-                      .replaceAll("MN:","<strong>MN:</strong>")
+            {if(!childName.isEmpty){childName.get}else{childName}} + " " + number + ":</strong> " + brokenLines.replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
+                      .replaceAll("MN:","<strong>MN:</strong>").replaceAll("<br></br>","<br></br>&#160;&#160;&#160;&#160;")
           //TODO:Utility.unescape(rectRes) may be needed to determine the width more accurately
-          val textWidth:Int = font.getStringBounds(rectRes.replaceAll("<strong>","").replaceAll("</strong>","").replaceAll("&#160;", " "), frc).getWidth().toInt
+          val textWidth:Int = font.getStringBounds("     " + {if(!childName.isEmpty){childName.get}else{childName}} +
+                  " " + number + ":",
+                      frc).getWidth().toInt + maxWidth
+
+
+
+//          val rectRes:String = "&#160;&#160;&#160;&#160;&#160;<strong>" +
+//            {if(!childName.isEmpty){childName.get}else{childName}} + " " + number + ":</strong> " + (Utility.escape(currentRect.node.text)).replaceAll("FN:", "<strong>FN:</strong>").replaceAll("LN:","<strong>LN:</strong>")
+//                      .replaceAll("MN:","<strong>MN:</strong>")
+//          //TODO:Utility.unescape(rectRes) may be needed to determine the width more accurately
+//          val textWidth:Int = font.getStringBounds(rectRes.replaceAll("<strong>","").replaceAll("</strong>","").replaceAll("&#160;", " "), frc).getWidth().toInt
+
           if(rect.size>1)
           {
             val tchil = addTextChildren(rect.tail,number+1,{if(textWidth>widthSoFar){textWidth}else{widthSoFar}}, pathParent)
@@ -343,8 +366,35 @@ trait ShowMetataggerComponent
       //the function to copy the label, incorporating the newly generated text (with lines), and the vertical distances
       def copyHeadLabel(headL:ClassifiedRectangle, topRel:Float):ClassifiedRectangle =
       {
-        val ( tokenizedText:String,  maxWidth:Int) = breakText(headL.node.text.split(" ").toList, List(),
-                                                      0, /* largestWidth:Int, */ 400)
+
+        //trims to 1000 chars
+        val truncatedText: String =
+
+
+        {
+          val t: String = headL.node.text.trim
+          //only for abstract
+          if(headL.node.id.toUpperCase()=="CONTENT -> HEADERS -> ABSTRACT")
+          {
+            val s =
+
+            t.substring(0, t.length.min(100))
+            s.length match
+            {
+
+              case 100 => s + t.substring(100, t.indexOf(" ", 100)) +  " [...] " + {if(t.length<=100){""} else {t.substring( t.indexOf(" ", {if(t.length-100<100){100}else{t.length-100}}),t.length)}}
+              case 0   => ""
+              case _   => s
+            }
+          }
+          else
+          {
+            t
+          }
+        }
+
+        val ( tokenizedText:String,  maxWidth:Int) = breakText(truncatedText.split(" ").toList /*headL.node.text.split(" ").toList*/, List(),
+                                                      0, 400)
 
 
 
@@ -354,11 +404,11 @@ trait ShowMetataggerComponent
         def boldenPart(tokenizedText:String):String = {
           if(tokenizedText.indexOf(":") > -1)
           {
-            "<strong>" + tokenizedText.substring(0,tokenizedText.indexOf(":")+1) + "</strong>" + tokenizedText.substring(tokenizedText.indexOf(":")+1,tokenizedText.length)
+            ("<strong>" + tokenizedText.substring(0,tokenizedText.indexOf(":")+1) + "</strong>" + tokenizedText.substring(tokenizedText.indexOf(":")+1,tokenizedText.length)).replace("[...]","<strong>[...]</strong>")
           }
           else
           {
-            "<strong>" + tokenizedText + "</strong>"
+            ("<strong>" + tokenizedText + "</strong>").replace("[...]","<strong>[...]</strong>")
           }
         }
         val finalTextWithChildren = boldenPart(tokenizedText) + childrenText
