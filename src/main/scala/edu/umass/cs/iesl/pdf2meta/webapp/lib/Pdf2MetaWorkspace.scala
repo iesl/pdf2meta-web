@@ -14,7 +14,7 @@ import net.liftweb.http._
 class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit val bindingModule: BindingModule) extends Workspace  with Injectable{
 
 
-  val (dir, file) = {
+  val (dir, file, relPath) = {
 
     val d = TempDirFactory()
     val f = File(d + File.separator + filename)
@@ -41,15 +41,15 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
 
     val properties:Map[String,String] = propertiesMapper.readPropertiesFile(mainPropertiesLocation)
 
-    def getDirAndFile():(scala.reflect.io.Directory, scala.reflect.io.File)=
+    def getDirAndFile():(scala.reflect.io.Directory, scala.reflect.io.File, String)=
     {
 
       if((properties.get("pdflocation")!=None && properties.get("pdflocation").get.trim!="" &&
-        linuxCommandExecuter.runCommand(List("diff", properties.get("pdflocation").get,d + File.separator + filename)/*"diff " + properties.get("pdflocation").get +
+        linuxCommandExecuter.runCommand(List("diff", propertiesPath + File.separator + properties.get("pdflocation").get,d + File.separator + filename)/*"diff " + properties.get("pdflocation").get +
           " " + d + File.separator + filename*/).trim!=""))
       {
         linuxCommandExecuter.runCommand(List("cp ", d + File.separator + filename,
-              properties.get("pdflocation").get)/*"cp " + d + File.separator + filename + " " +
+              propertiesPath + File.separator + properties.get("pdflocation").get)/*"cp " + d + File.separator + filename + " " +
                 properties.get("pdflocation").get + ""*/)
         propertiesMapper.savePropertiesValues(mainPropertiesLocation,
                                       Map("pdflocation" -> properties.get("pdflocation").get,
@@ -59,7 +59,7 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
       else if(properties.get("pdflocation")==None ||
                     properties.get("pdflocation").get.trim=="")
       {
-        val pdfDir = inject[String]('data_path) + File.separator + getOnlyFileName(filename).replaceAll(" ", "_")
+        val pdfDir = propertiesPath + File.separator + inject[String]('data_path) + File.separator + getOnlyFileName(filename).replaceAll(" ", "_")
 
         File(pdfDir).createDirectory(force=true)
 
@@ -67,7 +67,7 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
            (pdfDir + File.separator + filename.replaceAll(" ","_")))/*"cp " + d + File.separator + filename + " " +
           pdfDir + File.separator + ""*/)
         propertiesMapper.savePropertiesValues(mainPropertiesLocation,
-          Map("pdflocation" -> (pdfDir + File.separator + filename.replaceAll(" ","_")),
+          Map("pdflocation" -> (inject[String]('data_path) + File.separator + getOnlyFileName(filename).replaceAll(" ", "_") + File.separator + filename.replaceAll(" ","_")),
             "ispdfalreadyparsed" -> "false" ))
       }
       else
@@ -77,15 +77,16 @@ class Pdf2MetaWorkspace(val filename: String, instream: InputStream)(implicit va
 
       val modifiedProperties:Map[String,String] = propertiesMapper.readPropertiesFile(mainPropertiesLocation)
 
-      (File(modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/"))).createDirectory(),
-            File(modifiedProperties.get("pdflocation").get))
+      (File(propertiesPath + File.separator + modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/"))).createDirectory(),
+            File(propertiesPath + File.separator +  modifiedProperties.get("pdflocation").get),
+            modifiedProperties.get("pdflocation").get.substring(0, modifiedProperties.get("pdflocation").get.lastIndexOf("/")))
     }
 
-    val(dir,file) = getDirAndFile()
+    val(dir,file,relPath) = getDirAndFile()
     //deletes the temp file
     d.deleteRecursively()
 
-    (dir,file)
+    (dir,file,relPath)
   }
 
   def clean() {

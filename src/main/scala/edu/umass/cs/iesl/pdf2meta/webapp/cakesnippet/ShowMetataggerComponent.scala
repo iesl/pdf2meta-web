@@ -61,11 +61,11 @@ trait ShowMetataggerComponent
 
   //list that contains the children whose textbox have to be bound
   val childrenToBind:Seq[String] = List("HEADERS -> INSTITUTION",
-                                        "HEADERS -> ADDRESS"
-    ,
+                                        "HEADERS -> ADDRESS",
                                         "HEADERS -> NOTE -> DATE",
                                         "HEADERS -> NOTE -> INSTITUTION",
-                                        "HEADERS -> NOTE -> ADDRESS", "HEADERS -> EMAIL"
+                                        "HEADERS -> NOTE -> ADDRESS",
+                                        "HEADERS -> EMAIL"
                                         //
                                         )
 

@@ -80,7 +80,7 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 //      S.set("height", height)
       props.addOrReplaceValue(propertiesFilename,"width",width)
       props.addOrReplaceValue(propertiesFilename,"height",height)
-      props.addOrReplaceValue(propertiesFilename,"imagedir",w.dir.path)
+      props.addOrReplaceValue(propertiesFilename,"imagedir", w.asInstanceOf[Pdf2MetaWorkspace].relPath)
 
       val convertPath = inject[String]('convert)
       val command = List(convertPath, "-density", "400", "-verbose", w.file.toString(), outfilebase.toString)
@@ -102,7 +102,7 @@ class PdfToJpg(w: Workspace)(implicit val bindingModule: BindingModule) extends 
 	val outfiles: Map[Int, PageImage] =
 		{
 		val pageidRE = "-(\\d+)\\.jpg".r
-    val imDir = Directory(updatedProperties.get("imagedir").get)
+    val imDir = Directory(inject[String]('properties_path) + File.separator + updatedProperties.get("imagedir").get)
 		val elements: Iterator[Option[(Int, PageImage)]] = for (f <- imDir.files /*w.dir.files*/) yield
 			{
 			try

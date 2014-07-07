@@ -92,11 +92,11 @@ class Boot {
     )
 
 
-    LiftRules.exceptionHandler.prepend {
-      case (runMode, req, exception) =>
-        //logger.error("Failed at: "+req.uri)
-        RedirectResponse("/errorparsing")
-    }
+//    LiftRules.exceptionHandler.prepend {
+//      case (runMode, req, exception) =>
+//        //logger.error("Failed at: "+req.uri)
+//        RedirectResponse("/errorparsing")
+//    }
 
 
 
@@ -193,7 +193,7 @@ object ProjectConfiguration extends NewBindingModule({
     bind[String] idBy 'identify toSingle props.getProperty("identify")
     bind[String] idBy 'examples toSingle props.getProperty("examples")
     bind[String] idBy 'pstotext toSingle props.getProperty("pstotext")
-    bind[String] idBy 'pstotext_path toSingle props.getProperty("pstotext_path")
+//    bind[String] idBy 'pstotext_path toSingle props.getProperty("pstotext_path")
     bind[String] idBy 'runcrf_path toSingle props.getProperty("runcrf_path")
     bind[String] idBy 'properties_path toSingle props.getProperty("properties_path")
     bind[String] idBy 'data_path toSingle props.getProperty("data_path")
