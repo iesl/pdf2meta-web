@@ -298,8 +298,9 @@ trait ShowMetataggerComponent
       {
         if(leftTokens.size>0) {
           val firstElement = leftTokens.head
-          if (widthSoFar + font.getStringBounds({if((firstElement + " ").trim==""){""}else{firstElement + " "}}, frc).getWidth().toInt > maxWidth)
+          if (widthSoFar + font.getStringBounds({if((firstElement + " ").trim==""){""}else{firstElement + " "}}, frc).getWidth().toInt > maxWidth && widthSoFar >0)
           {
+            //println("left tokens: " + leftTokens)
             val retVal = breakText(leftTokens,List(),0, /*{if(widthSoFar > largestWidth){widthSoFar}else
                   {largestWidth}},*/ maxWidth)
             (Utility.escape(accumulatedTokens.map(x=> x.toString).mkString(" ")) + " \n<br></br> " + retVal._1,
