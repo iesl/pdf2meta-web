@@ -235,22 +235,28 @@ trait ShowMetataggerComponent
         if(recValue.exists(x => x.node.id == headL.node.id)/* && !(allowDuplicates.exists(x=> headL.node.id.toUpperCase().contains(x)))*/)
         {
           val value = recValue.find(x => x.node.id == headL.node.id)
-
-          if(value.get.node.rectangle.get.top < headL.node.rectangle.get.top )
-          {
-            val (left, right) = recValue.span(_.node.id != headL.node.id)
+          val (left, right) = recValue.span(_.node.id != headL.node.id)
 
 
-            val headLWChildren = headL.copy(children = headL.children ++ value.get.children )
-            (headLWChildren +: left) ++ right.drop(1)
-          }
-          else
-          {
-            val (left, right) = recValue.span(_.node.id != headL.node.id)
-            val headLWChildren = value.get.copy(children = headL.children ++ value.get.children )
-            (left :+ headLWChildren) ++ right.drop(1)
-//            recValue
-          }
+          //preference for the largest text
+          val headLDef = if(value.get.node.text.length>headL.node.text.length){value.get}else{headL};
+          val headLWChildren = headLDef.copy(children = headL.children ++ value.get.children )
+          (headLWChildren +: left) ++ right.drop(1)
+
+//          {
+//            val (left, right) = recValue.span(_.node.id != headL.node.id)
+//
+//
+//            val headLWChildren = headL.copy(children = headL.children ++ value.get.children )
+//            (headLWChildren +: left) ++ right.drop(1)
+//          }
+//          else
+//          {
+//            val (left, right) = recValue.span(_.node.id != headL.node.id)
+//            val headLWChildren = value.get.copy(children = headL.children ++ value.get.children )
+//            (left :+ headLWChildren) ++ right.drop(1)
+////            recValue
+//          }
         }
         else if (labelsToIgnore.exists(x=> x==headL.node.text))
         {
@@ -503,7 +509,9 @@ trait ShowMetataggerComponent
           }
           else
           {
-            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, id, "visible", referencePattern)(segmentTemplate)}
+            {if(sidelabels.size>=2) {
+              bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, id, "visible", referencePattern)(segmentTemplate)
+            }
             else {
               bind("externallabel", segmentTemplate,
               FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:" + visibility), "style"),
