@@ -57,7 +57,8 @@ trait ShowMetataggerComponent
         "HEADERS -> NOTE -> DATE" -> "DATE",
         "HEADERS -> NOTE -> INSTITUTION" -> "INSTITUTION",
         "HEADERS -> NOTE -> ADDRESS" -> "ADDRESS",
-        "HEADERS -> EMAIL" -> "EMAIL")
+        "HEADERS -> EMAIL" -> "EMAIL",
+        "REFERENCES -> AUTHORS" -> "AUTHOR")
 
   //list that contains the children whose textbox have to be bound
   val childrenToBind:Seq[String] = List("HEADERS -> INSTITUTION",
@@ -69,12 +70,7 @@ trait ShowMetataggerComponent
                                         //
                                         )
 
-  /*
-  *
-    val mapAcceptedLabels:Map[String, String] = Map("CONTENT -> HEADERS -> TITLE" -> "HEADERS -> TITLE",
-    "CONTENT -> HEADERS -> AUTHORS" -> "HEADERS -> AUTHORS",
-    "CONTENT -> HEADERS -> INSTITUTION" -> "HEADERS -> INSTITUTION",
-  * */
+
 
 	class ShowMetatagger(implicit val bindingModule:BindingModule) extends (NodeSeq => NodeSeq) with Injectable
 		{
@@ -332,7 +328,15 @@ trait ShowMetataggerComponent
         if(rect.size>0)
         {
           val currentRect = rect.head
-          val childName = mapPrefixChildren.get(pathParent)
+          val childName = mapPrefixChildren.get(
+            if(pathParent.indexOf(":") > (-1))
+            {
+              pathParent.substring(0,pathParent.indexOf(":"))
+            }
+            else
+            {
+              pathParent
+            })
 
           val (brokenLines:String, maxWidth:Int) = breakText((currentRect.node.text).split(" ").toList,
           List(), 0, 350)
@@ -571,16 +575,6 @@ trait ShowMetataggerComponent
           }
           else
           {
-
-//            {if(sidelabels.size>=2) {
-//              bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, id/*.replaceAll("\\s","")*/, "visible", referencePattern, paragraphPattern)(segmentTemplate)
-//            }
-//            else {
-//              bind("externallabel", segmentTemplate,
-//              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:" + visibility), "style"),
-//              FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
-//              "sidelabels" -> bindSidelabels(groupSideLabels ++ List(headSidelabels)) _
-//            )}}
             val coordRef =id.replaceAll("\\s","")
 
             if(coordRef != divId)
