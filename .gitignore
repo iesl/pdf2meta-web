@@ -1,6 +1,6 @@
 ## hgignore-common
 syntax: glob
-
+*.properties
 #*#
 *.DS_Store
 *.class
