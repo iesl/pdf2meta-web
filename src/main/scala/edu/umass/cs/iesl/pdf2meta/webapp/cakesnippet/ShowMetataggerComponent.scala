@@ -57,7 +57,8 @@ trait ShowMetataggerComponent
         "HEADERS -> NOTE -> DATE" -> "DATE",
         "HEADERS -> NOTE -> INSTITUTION" -> "INSTITUTION",
         "HEADERS -> NOTE -> ADDRESS" -> "ADDRESS",
-        "HEADERS -> EMAIL" -> "EMAIL")
+        "HEADERS -> EMAIL" -> "EMAIL",
+        "REFERENCES -> AUTHORS" -> "AUTHOR")
 
   //list that contains the children whose textbox have to be bound
   val childrenToBind:Seq[String] = List("HEADERS -> INSTITUTION",
@@ -69,12 +70,7 @@ trait ShowMetataggerComponent
                                         //
                                         )
 
-  /*
-  *
-    val mapAcceptedLabels:Map[String, String] = Map("CONTENT -> HEADERS -> TITLE" -> "HEADERS -> TITLE",
-    "CONTENT -> HEADERS -> AUTHORS" -> "HEADERS -> AUTHORS",
-    "CONTENT -> HEADERS -> INSTITUTION" -> "HEADERS -> INSTITUTION",
-  * */
+
 
 	class ShowMetatagger(implicit val bindingModule:BindingModule) extends (NodeSeq => NodeSeq) with Injectable
 		{
@@ -148,6 +144,9 @@ trait ShowMetataggerComponent
 
                             val reg = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*""", "coord1", "coord2", "coord3", "coord4", "pagenum")
                             val reg2 = new scala.util.matching.Regex("""REFERENCE_([\d]+)_([\d]+)_([\d]+)_([\d]+)_([\d]+).*reference$""", "coord1", "coord2", "coord3", "coord4", "pagenum")
+
+                            val regParagraphMarker = new scala.util.matching.Regex("""PARAGRAPH-MARKER([\d]+).*""", "par_id")
+
  						                bind("page", pageTemplate,
 						                     AttrBindParam("id", page.pagenum.toString, "id"),
                                 FuncAttrBindParam("style", (ns: NodeSeq) => addPlainCoords("0","0",
@@ -155,9 +154,9 @@ trait ShowMetataggerComponent
                                   properties.get("height").get /*pdfToJpg.height*/,ns), "style"),
 						                     "image" -> image,
                                  "externallabels" -> bindExternalLabels(all, List(), "", "visible",
-                                   reg
+                                   reg, regParagraphMarker
                                  ) _,
-                                  "textboxes" -> bindTextBoxesV2(all,reg2) _,
+                                  "textboxes" -> bindTextBoxesV2(all,reg2,regParagraphMarker) _,
                                  "pagenumber" ->  Text("---- Page " + page.pagenum + " ----")
                             )
 						                };
@@ -235,22 +234,28 @@ trait ShowMetataggerComponent
         if(recValue.exists(x => x.node.id == headL.node.id)/* && !(allowDuplicates.exists(x=> headL.node.id.toUpperCase().contains(x)))*/)
         {
           val value = recValue.find(x => x.node.id == headL.node.id)
-
-          if(value.get.node.rectangle.get.top < headL.node.rectangle.get.top )
-          {
-            val (left, right) = recValue.span(_.node.id != headL.node.id)
+          val (left, right) = recValue.span(_.node.id != headL.node.id)
 
 
-            val headLWChildren = headL.copy(children = headL.children ++ value.get.children )
-            (headLWChildren +: left) ++ right.drop(1)
-          }
-          else
-          {
-            val (left, right) = recValue.span(_.node.id != headL.node.id)
-            val headLWChildren = value.get.copy(children = headL.children ++ value.get.children )
-            (left :+ headLWChildren) ++ right.drop(1)
-//            recValue
-          }
+          //preference for the largest text
+          val headLDef = if(value.get.node.text.length>headL.node.text.length){value.get}else{headL};
+          val headLWChildren = headLDef.copy(children = headL.children ++ value.get.children )
+          (headLWChildren +: left) ++ right.drop(1)
+
+//          {
+//            val (left, right) = recValue.span(_.node.id != headL.node.id)
+//
+//
+//            val headLWChildren = headL.copy(children = headL.children ++ value.get.children )
+//            (headLWChildren +: left) ++ right.drop(1)
+//          }
+//          else
+//          {
+//            val (left, right) = recValue.span(_.node.id != headL.node.id)
+//            val headLWChildren = value.get.copy(children = headL.children ++ value.get.children )
+//            (left :+ headLWChildren) ++ right.drop(1)
+////            recValue
+//          }
         }
         else if (labelsToIgnore.exists(x=> x==headL.node.text))
         {
@@ -323,7 +328,15 @@ trait ShowMetataggerComponent
         if(rect.size>0)
         {
           val currentRect = rect.head
-          val childName = mapPrefixChildren.get(pathParent)
+          val childName = mapPrefixChildren.get(
+            if(pathParent.indexOf(":") > (-1))
+            {
+              pathParent.substring(0,pathParent.indexOf(":"))
+            }
+            else
+            {
+              pathParent
+            })
 
           val (brokenLines:String, maxWidth:Int) = breakText((currentRect.node.text).split(" ").toList,
           List(), 0, 350)
@@ -456,19 +469,25 @@ trait ShowMetataggerComponent
     }
 
     private def bindExternalLabels(sidelabels: Seq[ClassifiedRectangle], groupSideLabels:Seq[ClassifiedRectangle],
-                                  divId:String, visibility:String, referencePattern:Regex)(segmentTemplate: NodeSeq): NodeSeq =
+                                  divId:String, visibility:String, referencePattern:Regex, paragraphPattern:Regex)(segmentTemplate: NodeSeq): NodeSeq =
     {
+
+        if(sidelabels.size==0)
+        {
+          return List()
+        }
 
         val headSidelabels = sidelabels.head
         val id:String = headSidelabels.node.id
         val m4 = referencePattern.findAllIn(id)
+        val parrMatcher = paragraphPattern.findAllIn(id);
         if(!m4.isEmpty)
         {
           val coordRef = "REFERENCE_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum")
 
           if(coordRef == divId || groupSideLabels.size==0)
           {
-            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, coordRef, "hidden", referencePattern)(segmentTemplate)}
+            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, coordRef, "hidden", referencePattern, paragraphPattern)(segmentTemplate)}
               else { bind("externallabel", segmentTemplate,
               FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
               FuncAttrBindParam("id", (ns: NodeSeq) => Text(coordRef), "id"),
@@ -480,8 +499,61 @@ trait ShowMetataggerComponent
                 FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
                 FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
                 "sidelabels" -> bindSidelabels(groupSideLabels) _ ) ++
-                {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, "hidden", referencePattern)(segmentTemplate)}
+                {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, "hidden", referencePattern, paragraphPattern)(segmentTemplate)}
                       else { List()}}
+          }
+        }
+        else if (!parrMatcher.isEmpty)
+        {
+          val coordRef = "PARAGRAPH_" + (parrMatcher group "par_id")
+
+          if(coordRef != divId)
+          {
+             bind("externallabel", segmentTemplate,
+              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+              FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+              "sidelabels" -> bindSidelabels(/*groupSideLabels*/ groupSideLabels ) _ )  ++ {
+              if (sidelabels.size >= 2) {
+                bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, "visible", referencePattern, paragraphPattern)(segmentTemplate)
+              }
+              else if(sidelabels.size == 1)
+              {
+                //if it is the last element, both: grouped sidelabels and current sidelabel have to be bound
+                bind("externallabel", segmentTemplate,
+                  FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                  FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+                  "sidelabels" -> bindSidelabels(/*groupSideLabels*/ groupSideLabels ) _ ) ++
+                  bind("externallabel", segmentTemplate,
+                    FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                    FuncAttrBindParam("id", (ns: NodeSeq) => Text(coordRef), "id"),
+                    "sidelabels" -> bindSidelabels(/*groupSideLabels*/ sidelabels ) _ )
+              }
+              else {
+                List()
+              }
+            }
+          }
+          else
+          {
+
+
+              if (sidelabels.size >= 2) {
+                //if it is not the last element, keep recursion
+                bindExternalLabels(sidelabels.tail, groupSideLabels ++ List(headSidelabels), coordRef, "visible", referencePattern, paragraphPattern)(segmentTemplate)
+              }
+              else if (sidelabels.size==1)
+              {
+                //if it is the last element, then it has to be bound anyway, no more recursion is possible
+                bind("externallabel", segmentTemplate,
+                  FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                  FuncAttrBindParam("id", (ns: NodeSeq) => Text(coordRef), "id"),
+                  "sidelabels" -> bindSidelabels(groupSideLabels ++ sidelabels ) _ )
+              }
+              else {
+                List()
+              }
+
+
           }
         }
         else
@@ -494,7 +566,7 @@ trait ShowMetataggerComponent
               "sidelabels" -> bindSidelabels(groupSideLabels) _
             ) ++ {
               if (sidelabels.size >= 2) {
-                bindExternalLabels(sidelabels.tail, List(headSidelabels), id, "visible", referencePattern)(segmentTemplate)
+                bindExternalLabels(sidelabels.tail, List(headSidelabels), id/*.replaceAll("\\s","")*/, "visible", referencePattern, paragraphPattern)(segmentTemplate)
               }
               else {
                 List()
@@ -503,49 +575,96 @@ trait ShowMetataggerComponent
           }
           else
           {
-            {if(sidelabels.size>=2) {bindExternalLabels(sidelabels.tail, headSidelabels +: groupSideLabels, id, "visible", referencePattern)(segmentTemplate)}
-            else {
+            val coordRef =id.replaceAll("\\s","")
+
+            if(coordRef != divId)
+            {
               bind("externallabel", segmentTemplate,
-              FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:" + visibility), "style"),
-              FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
-              "sidelabels" -> bindSidelabels(groupSideLabels ++ List(headSidelabels)) _
-            )}}
+                FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+                "sidelabels" -> bindSidelabels(/*groupSideLabels*/ groupSideLabels ) _ )  ++ {
+                if (sidelabels.size >= 2) {
+                  bindExternalLabels(sidelabels.tail, List(headSidelabels), coordRef, "visible", referencePattern, paragraphPattern)(segmentTemplate)
+                }
+                else if(sidelabels.size == 1)
+                {
+                  //if it is the last element, both: grouped sidelabels and current sidelabel have to be bound
+                  bind("externallabel", segmentTemplate,
+                    FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                    FuncAttrBindParam("id", (ns: NodeSeq) => Text(divId), "id"),
+                    "sidelabels" -> bindSidelabels(/*groupSideLabels*/ groupSideLabels ) _ ) ++
+                    bind("externallabel", segmentTemplate,
+                      FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                      FuncAttrBindParam("id", (ns: NodeSeq) => Text(coordRef), "id"),
+                      "sidelabels" -> bindSidelabels(/*groupSideLabels*/ sidelabels ) _ )
+                }
+                else {
+                  List()
+                }
+              }
+            }
+            else
+            {
+              if (sidelabels.size >= 2) {
+                //if it is not the last element, keep recursion
+                bindExternalLabels(sidelabels.tail, groupSideLabels ++ List(headSidelabels), coordRef, "visible", referencePattern, paragraphPattern)(segmentTemplate)
+              }
+              else if (sidelabels.size==1)
+              {
+                //if it is the last element, then it has to be bound anyway, no more recursion is possible
+                bind("externallabel", segmentTemplate,
+                  FuncAttrBindParam("style", (ns: NodeSeq) => Text("visibility:hidden"), "style"),
+                  FuncAttrBindParam("id", (ns: NodeSeq) => Text(coordRef), "id"),
+                  "sidelabels" -> bindSidelabels(groupSideLabels ++ sidelabels ) _ )
+              }
+              else {
+                List()
+              }
 
+
+            }
           }
-
         }
     }
     private def bindSidelabels(sidelabels: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
     {
-      organizeLabels(getDistinctLabels(sidelabels, List("REFERENCES"))).flatMap
+      if(sidelabels.size==0)
       {
-        case x: ClassifiedRectangle =>
-        {
-          val truncatedText: String =
-          {
-            val t: String = x.node.text.trim
-            val s = t.substring(0, t.length.min(100000))
-            s.length match
-            {
-              case 100000 => s + " ..."
-              case 0   => "EMPTY"
-              case _   => s
-            }
-          }
-
-
-          val testText:String = "<font>" + truncatedText + "</font>"
-
-//          println("about to load: " + testText);
-          val brokenText:NodeSeq =  XML.loadString(testText) // testTextList.map(x=> {<font>{x}<br></br></font>}) //{<font>just test</font>} //breakText(truncatedText.split(" ").toList, List(), 0, 0, 60)
-
-          bind("sidelabel", segmentTemplate, "text" ->
-              /*truncatedText*/brokenText,
-              FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
-                "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
-        }
-        case _                      => NodeSeq.Empty
+        NodeSeq.Empty
       }
+      else
+      {
+        organizeLabels(getDistinctLabels(sidelabels, List("REFERENCES"))).flatMap
+        {
+          case x: ClassifiedRectangle =>
+          {
+            val truncatedText: String =
+            {
+              val t: String = x.node.text.trim
+              val s = t.substring(0, t.length.min(100000))
+              s.length match
+              {
+                case 100000 => s + " ..."
+                case 0   => "EMPTY"
+                case _   => s
+              }
+            }
+
+
+            val testText:String = "<font>" + truncatedText + "</font>"
+
+  //          println("about to load: " + testText);
+            val brokenText:NodeSeq =  XML.loadString(testText) // testTextList.map(x=> {<font>{x}<br></br></font>}) //{<font>just test</font>} //breakText(truncatedText.split(" ").toList, List(), 0, 0, 60)
+
+            bind("sidelabel", segmentTemplate, "text" ->
+                /*truncatedText*/brokenText,
+                FuncAttrBindParam("class", (ns: NodeSeq) => (addId(x.node, ns) ++ Text((if (x.discarded) " discard" else ""))),
+                  "class"), FuncAttrBindParam("style", (ns: NodeSeq) => (addCoordsLabels(x.node, ns)), "style"))
+          }
+          case _                      => NodeSeq.Empty
+        }
+      }
+
     }
 
 		private def bindFeatures(segments: Seq[ClassifiedRectangle])(segmentTemplate: NodeSeq): NodeSeq =
@@ -581,7 +700,7 @@ trait ShowMetataggerComponent
 			}
 			}
 
-		private def bindTextBoxes(textBoxes: Seq[DocNode], referencePattern:Regex)(textboxTemplate: NodeSeq): NodeSeq =
+		private def bindTextBoxes(textBoxes: Seq[DocNode], referencePattern:Regex, paragraphPattern:Regex)(textboxTemplate: NodeSeq): NodeSeq =
 			{
 
 			textBoxes.flatMap
@@ -605,7 +724,7 @@ trait ShowMetataggerComponent
 			}
 
 
-    private def bindTextBoxesV2(textBoxes: Seq[ClassifiedRectangle], referencePattern:Regex)(textboxTemplate: NodeSeq): NodeSeq =
+    private def bindTextBoxesV2(textBoxes: Seq[ClassifiedRectangle], referencePattern:Regex, paragraphPattern:Regex)(textboxTemplate: NodeSeq): NodeSeq =
     {
 
       textBoxes.flatMap
@@ -613,10 +732,17 @@ trait ShowMetataggerComponent
         textbox =>
         {
           val m4 = referencePattern.findAllIn(textbox.node.id)
+          val parMatcher = paragraphPattern.findAllIn(textbox.node.id)
           if(!m4.isEmpty)
           {
             bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox.node , ns), "style"),
               FuncAttrBindParam("class", (ns: NodeSeq) => Text("REFERENCE_" + (m4 group "coord1") + "_" + (m4 group "coord2") + "_" + (m4 group "coord3") + "_" + (m4 group "coord4") + "_" + (m4 group "pagenum"))
+                /*(ns: NodeSeq) => addId(textbox, ns)*/, "class"))
+          }
+          else if(!parMatcher.isEmpty)
+          {
+            bind("textbox", textboxTemplate, FuncAttrBindParam("style", (ns: NodeSeq) => addCoords(textbox.node , ns), "style"),
+              FuncAttrBindParam("class", (ns: NodeSeq) => Text("PARAGRAPH_" + (parMatcher group "par_id"))
                 /*(ns: NodeSeq) => addId(textbox, ns)*/, "class"))
           }
           else

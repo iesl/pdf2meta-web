@@ -13,7 +13,7 @@
   $.fn.uploadProgress = function(options) {
   options = $.extend({
     dataType: "json",
-    interval: 100,
+    interval: 2000,
     progressBar: "#progressbar",
     progressUrl: "/progress",
     start: function(){},

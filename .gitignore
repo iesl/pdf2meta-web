@@ -1,7 +1,6 @@
 ## hgignore-common
 syntax: glob
 pdf2meta.properties
-
 #*#
 *.DS_Store
 *.class
